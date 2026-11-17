@@ -64,7 +64,7 @@ import { contacto } from '../data/site';
   .ft__links p { margin: 0 0 .4rem; color: var(--mute); font-size: var(--step--1); }
   .ft__links a { text-decoration: none; font-weight: 600; padding-block: .45rem; }
   .ft__links a:hover { color: var(--led-ink); }
-  .ft__mark { font-variation-settings: 'wdth' 150 !important; font-size: clamp(4rem, 19.4vw, 19rem) !important;
+  .ft__mark { font-variation-settings: 'wdth' 150 !important; font-size: calc((min(100vw, var(--max)) - 2 * var(--gutter)) / 4.38) !important; letter-spacing: -0.06em !important;
     margin: clamp(3rem, 7vw, 6rem) -0.04em 0; font-size: clamp(4.5rem, 24.2vw, 22rem); line-height: .78;
     font-weight: 900; font-family: var(--display); font-variation-settings: 'wdth' 125; letter-spacing: -0.045em;
     color: transparent; -webkit-text-stroke: 1px var(--line);
