@@ -1,0 +1,34 @@
+---
+import Legal from '../../layouts/Legal.astro';
+import { marca, contacto } from '../../data/site';
+const titular = marca.titular || marca.nombre;
+---
+<Legal title="Términos y condiciones" description="Condiciones de compra y licencia de uso de los drum kits de Blito Producciones." actualizado="noviembre de 2026">
+  <h2>Quién vende</h2>
+  <p>Los productos de este sitio los vende {titular}{marca.cuit && <>, CUIT {marca.cuit}</>}, con domicilio en {marca.ciudad}, Argentina. Para cualquier consulta escribinos por <a href={contacto.whatsappUrl}>WhatsApp ({contacto.whatsapp})</a>{marca.email && <> o a <a href={`mailto:${marca.email}`}>{marca.email}</a></>}.</p>
+
+  <h2>Qué comprás</h2>
+  <p>Los drum kits son productos digitales: archivos de audio en formato WAV comprimidos en un .zip. No se envía nada físico. El contenido de cada kit está detallado en su página antes de comprar.</p>
+
+  <h2>Precio y pago</h2>
+  <p>Los precios están en pesos argentinos y son finales. El pago se procesa con Mercado Pago; nosotros no recibimos ni guardamos los datos de tu tarjeta o cuenta.</p>
+
+  <h2>Entrega</h2>
+  <p>Cuando Mercado Pago confirma el pago, te mandamos un link de descarga al mail que indicaste. El link dura 7 días y permite hasta 10 descargas. Si se vence, podés generar uno nuevo desde la página de tu compra. Si no te llega el mail en 24 horas, escribinos.</p>
+
+  <h2>Licencia de uso</h2>
+  <ul>
+    <li>Podés usar los sonidos en tus temas y producciones, publicarlos y monetizarlos, sin pagar regalías adicionales.</li>
+    <li>No podés revender, compartir ni redistribuir los sonidos tal como vienen, sueltos o dentro de otro kit, librería o banco de sonidos.</li>
+    <li>La licencia es personal: es para quien compró el kit.</li>
+  </ul>
+
+  <h2>Derecho de arrepentimiento</h2>
+  <p>Según el artículo 34 de la Ley 24.240 de Defensa del Consumidor, tenés 10 días corridos desde la compra para revocarla. Podés hacerlo desde el <a href="/arrepentimiento">Botón de arrepentimiento</a>; te damos un código de trámite y te respondemos por mail.</p>
+
+  <h2>Reclamos</h2>
+  <p>Si tenés un problema con una compra, escribinos primero y lo resolvemos. También podés acudir a la <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" rel="noopener">Dirección Nacional de Defensa del Consumidor</a>.</p>
+
+  <h2>Ley aplicable</h2>
+  <p>Estos términos se rigen por las leyes de la República Argentina.</p>
+</Legal>

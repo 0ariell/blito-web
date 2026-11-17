@@ -1,0 +1,80 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Botón de arrepentimiento · Blito Producciones" description="Revocá tu compra dentro de los 10 días corridos. Te damos un código de trámite.">
+  <section class="sec ar">
+    <div class="wrap ar__grid">
+      <div>
+        <h1 class="ar__t">Botón de arrepentimiento</h1>
+        <p class="ar__p">Tenés 10 días corridos desde la compra para revocarla (Ley 24.240, art. 34 y Res. 424/2020). Completá el formulario y te damos un código de trámite al instante. Te respondemos por mail.</p>
+      </div>
+      <form class="form ar__form" method="post" action="/api/arrepentimiento" novalidate data-arr>
+        <div class="field">
+          <label for="a-nombre">Nombre y apellido</label>
+          <input id="a-nombre" name="nombre" autocomplete="name" required />
+          <p class="field__err" id="ae-nombre"></p>
+        </div>
+        <div class="field">
+          <label for="a-email">Mail con el que compraste</label>
+          <input id="a-email" name="email" type="email" autocomplete="email" required spellcheck="false" />
+          <p class="field__err" id="ae-email"></p>
+        </div>
+        <div class="field">
+          <label for="a-pedido">Número de pedido <span class="opt">(opcional)</span></label>
+          <input id="a-pedido" name="pedido" autocomplete="off" spellcheck="false" aria-describedby="a-pedido-h" />
+          <p class="field__hint" id="a-pedido-h">Está en el mail de la compra.</p>
+        </div>
+        <div class="field">
+          <label for="a-motivo">Motivo <span class="opt">(opcional)</span></label>
+          <textarea id="a-motivo" name="motivo" rows="3"></textarea>
+        </div>
+        <button class="btn" type="submit">Enviar solicitud</button>
+        <div class="ar__ok" role="status" aria-live="polite" tabindex="-1"></div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .ar { padding-top: 140px; }
+  .ar__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); }
+  .ar__t { margin: 0; font-size: clamp(2.4rem, 1rem + 3.4vw, 4.4rem); line-height: .92; font-weight: 900; font-variation-settings: 'wdth' 100; letter-spacing: -0.03em; overflow-wrap: anywhere; hyphens: auto; }
+  .ar__p { margin: 1.4rem 0 0; color: var(--mute); font-size: var(--step-1); line-height: 1.35; max-width: 36ch; }
+  .ar__ok:empty { display: none; }
+  .ar__ok { padding: 1.2rem; border-radius: 14px; background: var(--led-soft); box-shadow: inset 0 0 0 1px var(--led-ink); }
+  .ar__ok :global(strong) { display: block; font-size: var(--step-2); font-variation-settings: 'wdth' 110; margin-top: .3rem; }
+  @media (max-width: 860px) { .ar__grid { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('[data-arr]')!;
+  const ok = form.querySelector<HTMLElement>('.ar__ok')!;
+  const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    form.querySelectorAll('.field__err').forEach((el) => (el.textContent = ''));
+    btn.disabled = true; btn.textContent = 'Enviando…';
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+      const data = await res.json();
+      if (data.ok) {
+        form.querySelectorAll('.field, button[type=submit]').forEach((el) => ((el as HTMLElement).hidden = true));
+        ok.innerHTML = '';
+        const p = document.createElement('p');
+        p.textContent = 'Recibimos tu solicitud. Tu código de trámite es';
+        const s = document.createElement('strong');
+        s.textContent = data.codigo;
+        p.append(s);
+        ok.append(p);
+        ok.focus();
+        return;
+      }
+      for (const [k, msg] of Object.entries<string>(data.errors ?? {})) document.getElementById(`ae-${k}`)!.textContent = msg;
+      if (data.error) ok.textContent = data.error;
+    } catch {
+      ok.textContent = 'No se pudo enviar. Revisá tu conexión y probá de nuevo.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Enviar solicitud';
+    }
+  });
+</script>

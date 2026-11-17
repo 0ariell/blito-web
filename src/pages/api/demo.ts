@@ -1,5 +1,7 @@
 import type { APIRoute } from 'astro';
 import { sql } from '../../lib/db';
+import { env } from '../../lib/env';
+import { enviarMail, plantilla, esc } from '../../lib/mail';
 
 export const prerender = false;
 
@@ -27,5 +29,9 @@ export const POST: APIRoute = async ({ request }) => {
     return Response.json({ ok: true, stored: false });
   }
   await sql`insert into demos (nombre, contacto, link, mensaje) values (${nombre}, ${contacto}, ${link}, ${mensaje || null})`;
+  const aviso = env.notifyEmail();
+  if (aviso) {
+    await enviarMail(aviso, `Demo nueva de ${nombre}`, plantilla('Llegó una demo', `<p><strong>${esc(nombre)}</strong> (${esc(contacto)})</p><p>${esc(mensaje || 'Sin mensaje.')}</p>`, { texto: 'Escuchar', url: link }));
+  }
   return Response.json({ ok: true, stored: true });
 };

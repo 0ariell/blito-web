@@ -16,7 +16,7 @@
 <style>
   .pl {
     width: min(1100px, calc(100vw - 2 * var(--gutter))); max-height: 92vh; padding: 0; border: 0; border-radius: 16px;
-    background: #000; color: #fff; box-shadow: 0 0 0 1px var(--line), 0 30px 120px rgba(43,48,242,.35); overflow: hidden;
+    background: #000; color: #fff; box-shadow: 0 0 0 1px var(--line), 0 30px 120px rgba(43,48,242,.35); overflow: hidden; overscroll-behavior: contain;
   }
   .pl::backdrop { background: rgba(0,0,0,.8); backdrop-filter: blur(6px); }
   .pl[open] { animation: pl-in .28s var(--ease); }

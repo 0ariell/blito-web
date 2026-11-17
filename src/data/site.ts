@@ -1,5 +1,15 @@
-// Contenido editable del sitio. Todo lo marcado con `borrador: true` es provisorio
-// y hay que confirmarlo con Blito antes de publicar (ver README).
+// Contenido editable del sitio.
+
+export const marca = {
+  nombre: 'Blito Producciones',
+  ciudad: 'Buenos Aires',
+  pais: 'AR',
+  /** Datos del titular para los términos. Completar antes de vender. */
+  titular: process.env.LEGAL_TITULAR ?? '',
+  cuit: process.env.LEGAL_CUIT ?? '',
+  /** Mail de contacto legal (LEGAL_EMAIL). Si falta, los legales remiten a WhatsApp. */
+  email: process.env.LEGAL_EMAIL ?? '',
+};
 
 export const contacto = {
   whatsapp: '+54 9 11 3589-6893',
@@ -64,11 +74,8 @@ export type Kit = {
   contenido: { item: string; cantidad: number }[];
   generos: string[];
   precioArs: number;
-  precioUsd: number;
+  /** 'venta' se cobra con Mercado Pago si el servidor tiene credenciales y archivo (ver README). */
   estado: 'venta' | 'proximamente';
-  /** Link de pago (Mercado Pago, Lemon Squeezy, etc.). Sin link, el botón anota en la lista de espera. */
-  comprarUrl?: string;
-  borrador: true;
 };
 
 export const kits: Kit[] = [
@@ -88,9 +95,7 @@ export const kits: Kit[] = [
     ],
     generos: ['RKT', 'Trap', 'Drill'],
     precioArs: 18000,
-    precioUsd: 15,
     estado: 'venta',
-    borrador: true,
   },
   {
     slug: 'turreo-edits',
@@ -107,9 +112,7 @@ export const kits: Kit[] = [
     ],
     generos: ['Turreo', 'RKT', 'Cumbia'],
     precioArs: 14000,
-    precioUsd: 12,
     estado: 'venta',
-    borrador: true,
   },
   {
     slug: 'clande-vol-1',
@@ -125,9 +128,7 @@ export const kits: Kit[] = [
     ],
     generos: ['Trap', 'Drill'],
     precioArs: 16000,
-    precioUsd: 13,
     estado: 'proximamente',
-    borrador: true,
   },
 ];
 
@@ -139,4 +140,5 @@ export const servicios = [
 ];
 
 export const totalSonidos = (k: Kit) => k.contenido.reduce((n, c) => n + c.cantidad, 0);
-export const ars = (n: number) => '$' + n.toLocaleString('es-AR');
+const pesos = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+export const ars = (n: number) => pesos.format(n);

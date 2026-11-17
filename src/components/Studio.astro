@@ -20,7 +20,7 @@ const fotos = [
       <dl class="svc">
         {servicios.map((s) => (<div><dt>{s.titulo}</dt><dd>{s.texto}</dd></div>))}
       </dl>
-      <a href="#demo" class="btn" style="margin-top:2rem">Reservar una sesión</a>
+      <a href="#demo" class="btn st__cta">Reservar una sesión</a>
     </div>
   </div>
 </section>
@@ -31,6 +31,7 @@ const fotos = [
   .st__photos img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; }
   .st__photos img:nth-child(2n) { transform: translateY(2.5rem); }
   .svc { margin: 2rem 0 0; }
+  .st__cta { margin-top: 2rem; }
   .svc > div { padding: 1.3rem 0; border-top: 1px solid var(--line); }
   .svc dt { font-size: var(--step-1); font-weight: 800; }
   .svc dd { margin: .35rem 0 0; color: var(--mute); max-width: 48ch; }

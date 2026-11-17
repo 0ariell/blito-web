@@ -1,0 +1,74 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getPedido, procesarPago } from '../../lib/pedidos';
+import { linkDescarga } from '../../lib/tokens';
+import { kits } from '../../data/site';
+import { contacto } from '../../data/site';
+
+export const prerender = false;
+Astro.response.headers.set('Cache-Control', 'no-store');
+Astro.response.headers.set('X-Robots-Tag', 'noindex');
+
+const id = Astro.params.id ?? '';
+let pedido = await getPedido(id);
+const paymentId = Astro.url.searchParams.get('payment_id');
+// Al volver de Mercado Pago confirmamos el pago contra su API, sin esperar al webhook.
+if (pedido && pedido.estado === 'pendiente' && paymentId && /^\d+$/.test(paymentId)) {
+  try { pedido = (await procesarPago(paymentId)) ?? pedido; } catch (e) { console.error('[compra]', e); }
+}
+if (!pedido) Astro.response.status = 404;
+const kit = pedido ? kits.find((k) => k.slug === pedido!.kit_slug) : undefined;
+const nombre = kit ? `${kit.nombre} Vol. ${Number(kit.vol)}` : '';
+const vencido = Astro.url.searchParams.has('vencido');
+---
+<Base title={pedido ? `Tu compra: ${nombre}` : 'Compra no encontrada'} description="Estado de tu compra en Blito Producciones." noindex>
+  <section class="sec cp">
+    <div class="wrap cp__in">
+      {!pedido && (
+        <>
+          <h1 class="cp__t">No encontramos esta compra</h1>
+          <p class="cp__p">Revisá el link del mail. Si pagaste y no te llegó nada, escribinos y lo resolvemos.</p>
+          <a class="btn" href={contacto.whatsappUrl}>Escribir por WhatsApp</a>
+        </>
+      )}
+      {pedido?.estado === 'pagado' && (
+        <>
+          <p class="cp__state cp__state--ok">Pago aprobado</p>
+          <h1 class="cp__t">{nombre} es tuyo</h1>
+          <p class="cp__p">{vencido ? 'Tu link anterior se venció. Acá tenés uno nuevo, válido por 7 días.' : `También te lo mandamos a ${pedido.email}. El link dura 7 días.`}</p>
+          <a class="btn btn--big" href={linkDescarga(pedido.id)} rel="nofollow">Descargar kit (.zip)</a>
+          <p class="cp__meta">Pedido {pedido.id}</p>
+        </>
+      )}
+      {pedido?.estado === 'pendiente' && (
+        <>
+          <p class="cp__state">Esperando confirmación</p>
+          <h1 class="cp__t">Estamos esperando el pago</h1>
+          <p class="cp__p">Si ya pagaste, Mercado Pago puede tardar unos minutos en confirmarlo. Te mandamos el link de descarga a {pedido.email} apenas se acredite.</p>
+          <a class="btn btn--ghost" href={Astro.url.pathname}>Actualizar estado</a>
+        </>
+      )}
+      {pedido?.estado === 'rechazado' && (
+        <>
+          <p class="cp__state cp__state--bad">Pago rechazado</p>
+          <h1 class="cp__t">El pago no se pudo hacer</h1>
+          <p class="cp__p">No se cobró nada. Podés intentar de nuevo con otro medio de pago.</p>
+          <a class="btn" href={`/kits/${pedido.kit_slug}#comprar`}>Volver a intentar</a>
+        </>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .cp { min-height: 80svh; display: grid; align-items: center; padding-top: 140px; }
+  .cp__in { max-width: 760px; }
+  .cp__state { display: inline-flex; align-items: center; gap: .5rem; margin: 0 0 1rem; font-weight: 700; color: var(--mute); }
+  .cp__state::before { content: ''; width: .6rem; height: .6rem; border-radius: 50%; background: currentColor; }
+  .cp__state--ok { color: #6cf0a2; }
+  .cp__state--bad { color: #ff8a82; }
+  .cp__t { margin: 0; font-size: clamp(2.4rem, 1.2rem + 4.5vw, 5rem); line-height: .9; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.035em; }
+  .cp__p { margin: 1.2rem 0 2rem; font-size: var(--step-1); line-height: 1.35; color: var(--mute); max-width: 40ch; }
+  .btn--big { min-height: 60px; padding-inline: 2rem; font-size: var(--step-1); }
+  .cp__meta { margin-top: 2rem; font-size: var(--step--1); color: var(--mute); font-variant-numeric: tabular-nums; }
+</style>

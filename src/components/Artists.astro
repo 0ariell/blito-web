@@ -13,7 +13,7 @@ import { img } from '../lib/img';
           <li>
             <a href={a.url} data-i={i} class:list={[{ 'is-on': i === 0 }]} target="_blank" rel="noopener">
               <Image src={img(a.img)} alt="" widths={[96]} sizes="48px" class="names__thumb" loading="lazy" />
-              <span>{a.nombre}</span>
+              <span translate="no">{a.nombre}</span>
             </a>
           </li>
         ))}

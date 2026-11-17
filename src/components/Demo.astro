@@ -22,12 +22,12 @@ import { contacto } from '../data/site';
       </div>
       <div class="field">
         <label for="f-contacto">Instagram, mail o WhatsApp</label>
-        <input id="f-contacto" name="contacto" required placeholder="@tuusuario" />
+        <input id="f-contacto" name="contacto" required autocomplete="off" spellcheck="false" placeholder="@tuusuario o tu mail…" />
         <p class="field__err" id="e-contacto"></p>
       </div>
       <div class="field">
         <label for="f-link">Link al tema</label>
-        <input id="f-link" name="link" type="url" inputmode="url" required placeholder="https://drive.google.com/…" aria-describedby="h-link" />
+        <input id="f-link" name="link" type="url" inputmode="url" required autocomplete="off" spellcheck="false" placeholder="https://drive.google.com/…" aria-describedby="h-link" />
         <p class="field__hint" id="h-link">Drive, SoundCloud o YouTube oculto. Que se pueda escuchar sin pedir acceso.</p>
         <p class="field__err" id="e-link"></p>
       </div>
@@ -50,24 +50,6 @@ import { contacto } from '../data/site';
   .direct { margin-top: 2.5rem; display: grid; gap: .2rem; justify-items: start; }
   .direct p { margin: 0 0 .4rem; font-weight: 700; color: var(--led-ink); }
   .direct a { font-weight: 500; text-underline-offset: .25em; padding-block: .35rem; }
-  .form { display: grid; gap: 1.4rem; align-content: start; }
-  .field { display: grid; gap: .45rem; }
-  .field label { font-weight: 700; }
-  .opt { font-weight: 400; color: var(--mute); }
-  .field input, .field textarea {
-    width: 100%; font: inherit; color: #fff; background: var(--panel);
-    border: 1px solid var(--line); border-radius: 12px; padding: .85rem 1rem; min-height: 50px;
-    transition: border-color .15s, box-shadow .15s;
-  }
-  .field input::placeholder, .field textarea::placeholder { color: #8c90ad; }
-  .field input:focus, .field textarea:focus { outline: none; border-color: var(--led-ink); box-shadow: 0 0 0 3px var(--led-soft); }
-  .field input[aria-invalid='true'] { border-color: #ff6b61; }
-  .field__hint { margin: 0; font-size: var(--step--1); color: var(--mute); }
-  .field__err { margin: 0; font-size: var(--step--1); color: #ff8a82; font-weight: 600; }
-  .field__err:empty { display: none; }
-  .form .btn { justify-self: start; }
-  .form__status { margin: 0; font-weight: 700; color: var(--led-ink); }
-  .form__status:empty { display: none; }
   .hp { position: absolute; left: -9999px; }
   @media (max-width: 860px) { .demo__grid { grid-template-columns: 1fr; } }
 </style>

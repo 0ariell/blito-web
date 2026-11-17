@@ -47,7 +47,7 @@ const filtros = [
                 </span>
               </span>
               <span class="card__txt">
-                <span class="card__tema">{l.tema}</span>
+                <span class="card__tema" translate="no">{l.tema}</span>
                 <span class="card__meta">{l.artistas}</span>
                 <span class="card__src">{l.spotify ? 'Escuchar en Spotify' : 'Ver video'}{l.anio && `, ${l.anio}`}</span>
               </span>
@@ -119,13 +119,22 @@ const filtros = [
 <script>
   const chips = document.querySelectorAll<HTMLButtonElement>('.chip');
   const cards = document.querySelectorAll<HTMLElement>('.card');
-  chips.forEach((c) => c.addEventListener('click', () => {
-    chips.forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
-    const f = c.dataset.filter;
+  const aplicar = (f: string) => {
+    chips.forEach((x) => x.setAttribute('aria-pressed', String(x.dataset.filter === f)));
     cards.forEach((card, i) => {
       card.hidden = card.dataset.tipo === 'todo' ? f !== 'todo' : f !== 'todo' && card.dataset.tipo !== f;
       // la tarjeta grande solo tiene sentido en "Todo"
       card.classList.toggle('card--lead', i === 0 && f === 'todo');
     });
+  };
+  // El filtro queda en la URL (?filtro=remix) para poder compartirlo.
+  chips.forEach((c) => c.addEventListener('click', () => {
+    const f = c.dataset.filter!;
+    aplicar(f);
+    const u = new URL(location.href);
+    f === 'todo' ? u.searchParams.delete('filtro') : u.searchParams.set('filtro', f);
+    history.replaceState(null, '', u);
   }));
+  const inicial = new URL(location.href).searchParams.get('filtro');
+  if (inicial && [...chips].some((c) => c.dataset.filter === inicial)) aplicar(inicial);
 </script>

@@ -1,0 +1,26 @@
+---
+import Base from '../layouts/Base.astro';
+// En el servidor, para que las rutas dinámicas puedan hacer rewrite a esta página.
+export const prerender = false;
+Astro.response.status = 404;
+---
+<Base title="Página no encontrada · Blito Producciones" description="Esta página no existe." noindex>
+  <section class="nf">
+    <div class="wrap">
+      <p class="nf__code" aria-hidden="true">404</p>
+      <h1 class="nf__t">Este tema no está en el catálogo</h1>
+      <p class="nf__p">La página que buscás no existe o se movió.</p>
+      <div class="nf__a">
+        <a class="btn" href="/">Ir al inicio</a>
+        <a class="btn btn--ghost" href="/kits">Ver drum kits</a>
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .nf { min-height: 90svh; display: grid; align-items: center; padding-top: 100px; }
+  .nf__code { margin: 0; font-size: clamp(7rem, 30vw, 22rem); line-height: .8; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.05em; color: transparent; -webkit-text-stroke: 2px var(--led-ink); }
+  .nf__t { margin: 1.5rem 0 0; font-size: var(--step-2); font-weight: 900; font-variation-settings: 'wdth' 112; }
+  .nf__p { color: var(--mute); }
+  .nf__a { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.5rem; }
+</style>

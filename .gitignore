@@ -3,3 +3,6 @@ dist
 .astro
 .env
 .impeccable/
+.env.test
+test-results
+playwright-report

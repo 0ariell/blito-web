@@ -8,8 +8,8 @@ import { contacto } from '../data/site';
         <h2>Enterate cuando sale un kit</h2>
         <p>Un mail por lanzamiento. Nada más.</p>
         <div class="ft__row">
-          <label class="visually-hidden" for="news-email">Tu mail</label>
-          <input id="news-email" name="email" type="email" autocomplete="email" required placeholder="tu@mail.com" />
+          <label class="visually-hidden" for="news-email">Tu mail para novedades</label>
+          <input id="news-email" name="email" type="email" autocomplete="email" required placeholder="tu@mail.com" spellcheck="false" />
           <input type="hidden" name="origen" value="footer" />
           <button class="btn" type="submit">Suscribirme</button>
         </div>
@@ -22,10 +22,15 @@ import { contacto } from '../data/site';
         <a href={contacto.whatsappUrl}>WhatsApp</a>
       </nav>
     </div>
-    <p class="ft__mark" aria-hidden="true">BLITO</p>
+    <p class="ft__mark" aria-hidden="true" translate="no">BLITO</p>
     <div class="ft__base">
       <p>© 2026 Blito Producciones. Buenos Aires, Argentina.</p>
-      <p><a href="/kits">Drum kits</a> <a href="/#demo">Mandá tu demo</a></p>
+      <nav class="ft__legal" aria-label="Legales">
+        <a href="/legales/terminos">Términos</a>
+        <a href="/legales/privacidad">Privacidad</a>
+        <a href="https://www.argentina.gob.ar/produccion/defensadelconsumidor/formulario" rel="noopener">Defensa del consumidor</a>
+        <a href="/arrepentimiento" class="ft__arr">Botón de arrepentimiento</a>
+      </nav>
     </div>
   </div>
 </footer>
@@ -54,7 +59,9 @@ import { contacto } from '../data/site';
   }
   .ft__base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; padding-block: 1.5rem 2rem; font-size: var(--step--1); color: var(--mute); }
   .ft__base p { margin: 0; }
-  .ft__base a { margin-left: 1.2rem; }
+  .ft__legal { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; }
+  .ft__legal a { padding-block: .5rem; }
+  .ft__arr { color: #fff; font-weight: 700; }
   @media (max-width: 760px) {
     .ft__grid { grid-template-columns: 1fr; }
     .ft__row { flex-direction: column; }

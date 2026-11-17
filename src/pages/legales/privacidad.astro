@@ -1,0 +1,21 @@
+---
+import Legal from '../../layouts/Legal.astro';
+import { marca, contacto } from '../../data/site';
+---
+<Legal title="Política de privacidad" description="Qué datos guarda Blito Producciones, para qué los usa y cómo pedir que se borren." actualizado="noviembre de 2026">
+  <h2>Qué datos guardamos</h2>
+  <ul>
+    <li><strong>Si comprás un kit:</strong> tu mail, el kit, el monto y el estado del pago. Los datos de tarjeta o cuenta los maneja Mercado Pago y nunca llegan a nosotros.</li>
+    <li><strong>Si mandás una demo:</strong> tu nombre, cómo contactarte, el link al tema y tu mensaje.</li>
+    <li><strong>Si te suscribís:</strong> tu mail y desde qué parte del sitio te anotaste.</li>
+  </ul>
+
+  <h2>Para qué los usamos</h2>
+  <p>Para entregarte lo que compraste, responderte sobre tu demo y avisarte de lanzamientos si te suscribiste. No vendemos ni compartimos tus datos con terceros, salvo los proveedores que hacen funcionar el sitio: Mercado Pago (pagos), Neon (base de datos), Render (hosting) y Resend (envío de mails).</p>
+
+  <h2>Cookies y medición</h2>
+  <p>No usamos cookies propias de seguimiento ni de publicidad. Los reproductores de YouTube (en modo de privacidad mejorada) y Spotify se cargan solo cuando tocás play, y desde ese momento pueden usar sus propias cookies.</p>
+
+  <h2>Tus derechos</h2>
+  <p>Podés pedir ver, corregir o borrar tus datos cuando quieras escribiéndonos por <a href={contacto.whatsappUrl}>WhatsApp</a>{marca.email && <> o a <a href={`mailto:${marca.email}`}>{marca.email}</a></>}. La Agencia de Acceso a la Información Pública, órgano de control de la Ley 25.326, atiende denuncias y reclamos por incumplimiento de las normas de protección de datos personales.</p>
+</Legal>

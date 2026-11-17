@@ -3,10 +3,30 @@ services:
     name: blito-producciones
     runtime: node
     plan: free
+    region: virginia
     buildCommand: npm ci && npm run build
     startCommand: npm start
+    healthCheckPath: /healthz
     envVars:
+      - key: NODE_VERSION
+        value: "22"
       - key: HOST
         value: 0.0.0.0
+      - key: SITE_URL
+        value: https://blito-producciones.onrender.com
+      - key: DOWNLOAD_TOKEN_SECRET
+        generateValue: true
       - key: DATABASE_URL
+        sync: false
+      - key: MP_ACCESS_TOKEN
+        sync: false
+      - key: MP_WEBHOOK_SECRET
+        sync: false
+      - key: KIT_ARCHIVOS
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: MAIL_FROM
+        sync: false
+      - key: NOTIFY_EMAIL
         sync: false
