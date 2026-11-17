@@ -1,43 +1,92 @@
 ---
 import Base from '../../layouts/Base.astro';
-import KitCover from '../../components/KitCover.astro';
-import { kits, totalSonidos, ars } from '../../data/site';
+import KitCard from '../../components/KitCard.astro';
+import KitsInfo from '../../components/KitsInfo.astro';
+import { kits, totalSonidos } from '../../data/site';
+
+const generos = [...new Set(kits.flatMap((k) => k.generos))];
+const sonidos = kits.reduce((n, k) => n + totalSonidos(k), 0);
+const jsonld = {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: 'Drum kits de Blito',
+  itemListElement: kits.map((k, i) => ({ '@type': 'ListItem', position: i + 1, url: new URL(`/kits/${k.slug}`, Astro.site).href, name: `${k.nombre} Vol. ${Number(k.vol)}` })),
+};
 ---
-<Base title="Drum kits de Blito" description="Drum kits, loops y one-shots para RKT, trap, drill y turreo, hechos en el estudio de Blito.">
+<Base title="Drum kits de Blito: sonidos para RKT, trap y turreo" description="Drum kits, loops y one-shots hechos en el estudio de Blito. WAV, descarga al instante y licencia libre de regalías." jsonld={jsonld}>
   <section class="sec kl">
     <div class="wrap">
-      <h1 class="kl__title">Drum kits</h1>
-      <p class="sec-lead kl__lead">Los sonidos del estudio, listos para arrastrar al proyecto. WAV, descarga al instante, libres de regalías.</p>
+      <div class="kl__head">
+        <div>
+          <h1 class="kl__title">Drum kits</h1>
+          <p class="kl__lead">Los sonidos con los que se hacen los temas del estudio, listos para arrastrar a tu proyecto.</p>
+        </div>
+        <dl class="kl__facts">
+          <div><dt>Kits</dt><dd>{kits.length}</dd></div>
+          <div><dt>Sonidos</dt><dd>{sonidos}</dd></div>
+          <div><dt>Formato</dt><dd>WAV</dd></div>
+        </dl>
+      </div>
+
+      <div class="kl__bar">
+        <div class="chips" role="group" aria-label="Filtrar por género">
+          <button class="chip" data-g="todos" aria-pressed="true">Todos</button>
+          {generos.map((g) => <button class="chip" data-g={g.toLowerCase()} aria-pressed="false">{g}</button>)}
+        </div>
+        <a class="kl__recover" href="/kits/mis-compras">¿Ya compraste? Recuperá tus descargas</a>
+      </div>
+
       <ul class="kl__grid" role="list">
-        {kits.map((k) => (
-          <li>
-            <a href={`/kits/${k.slug}`} class="kl__item">
-              <KitCover kit={k} />
-              <span class="kl__row">
-                <span class="kl__name">{k.nombre} Vol. {Number(k.vol)}</span>
-                <span class="kl__price">{k.estado === 'venta' ? ars(k.precioArs) : 'Próximamente'}</span>
-              </span>
-              <span class="kl__meta">{k.generos.join(', ')}. {totalSonidos(k)} sonidos.</span>
-            </a>
-          </li>
-        ))}
+        {kits.map((k, i) => <li><KitCard kit={k} nuevo={i === 0} /></li>)}
       </ul>
+      <p class="kl__empty" hidden>No hay kits de este género todavía. <button class="kl__reset" data-g="todos">Ver todos</button></p>
+
+      <div class="kl__info"><KitsInfo /></div>
     </div>
   </section>
 </Base>
 
 <style>
   .kl { padding-top: 140px; }
-  .kl__title { margin: 0; font-size: clamp(3.4rem, 1rem + 9vw, 10rem); line-height: .82; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.045em; }
-  .kl__lead { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
-  .kl__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2.5vw, 2rem); }
-  .kl__item { display: grid; gap: .8rem; text-decoration: none; }
-  .kl__item :global(.kc) { transition: transform .45s var(--ease), box-shadow .3s; }
-  .kl__item:hover :global(.kc) { transform: translateY(-6px); box-shadow: inset 0 0 0 1px var(--led-ink), 0 30px 60px -30px rgba(43,48,242,.8); }
-  .kl__row { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
-  .kl__name { font-size: var(--step-1); font-weight: 900; font-variation-settings: 'wdth' 112; }
-  .kl__price { color: var(--led-ink); font-weight: 700; white-space: nowrap; }
-  .kl__meta { color: var(--mute); font-size: var(--step--1); margin-top: -.5rem; }
+  .kl__head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 2rem; }
+  .kl__title { margin: 0; font-family: var(--display); font-variation-settings: 'wdth' 150; font-weight: 900; font-size: clamp(3.2rem, 1rem + 9vw, 10rem); line-height: .82; letter-spacing: -0.045em; }
+  .kl__lead { margin: 1.2rem 0 0; max-width: 40ch; color: var(--mute); font-size: var(--step-1); line-height: 1.35; }
+  .kl__facts { display: flex; gap: clamp(1.4rem, 3vw, 3rem); margin: 0; }
+  .kl__facts dt { color: var(--mute); font-size: var(--step--1); }
+  .kl__facts dd { margin: 0; font-family: var(--display); font-variation-settings: 'wdth' 125; font-weight: 900; font-size: var(--step-2); font-variant-numeric: tabular-nums; }
+  .kl__bar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 1rem; margin: clamp(2.5rem, 5vw, 4rem) 0 clamp(1.5rem, 3vw, 2.5rem); }
+  .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .chip { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 0; cursor: pointer; background: transparent; box-shadow: inset 0 0 0 1px var(--line); color: var(--mute); font-weight: 600; transition: background-color .18s, color .18s, box-shadow .18s; }
+  .chip:hover { color: #fff; box-shadow: inset 0 0 0 1px var(--led-ink); }
+  .chip[aria-pressed='true'] { background: var(--led); color: #fff; box-shadow: none; }
+  .kl__recover { color: var(--led-ink); font-weight: 600; text-underline-offset: .25em; padding-block: .5rem; }
+  .kl__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1.2rem, 2.5vw, 2rem); }
+  .kl__grid li[hidden] { display: none; }
+  .kl__empty { color: var(--mute); }
+  .kl__reset { background: none; border: 0; color: var(--led-ink); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; }
+  .kl__info { margin-top: clamp(5rem, 10vw, 8rem); }
   @media (max-width: 900px) { .kl__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-  @media (max-width: 560px) { .kl__grid { grid-template-columns: 1fr; } }
+  @media (max-width: 560px) { .kl__grid { grid-template-columns: 1fr; } .kl__facts { width: 100%; justify-content: space-between; } }
 </style>
+
+<script>
+  const chips = document.querySelectorAll<HTMLButtonElement>('.chip');
+  const items = document.querySelectorAll<HTMLLIElement>('.kl__grid > li');
+  const empty = document.querySelector<HTMLElement>('.kl__empty')!;
+  const aplicar = (g: string) => {
+    chips.forEach((c) => c.setAttribute('aria-pressed', String(c.dataset.g === g)));
+    let visibles = 0;
+    items.forEach((li) => {
+      const generos = li.querySelector<HTMLElement>('[data-generos]')!.dataset.generos!.split('|');
+      li.hidden = g !== 'todos' && !generos.includes(g);
+      if (!li.hidden) visibles++;
+    });
+    empty.hidden = visibles > 0;
+    const u = new URL(location.href);
+    g === 'todos' ? u.searchParams.delete('genero') : u.searchParams.set('genero', g);
+    history.replaceState(null, '', u);
+  };
+  document.querySelectorAll<HTMLButtonElement>('[data-g]').forEach((b) => b.addEventListener('click', () => aplicar(b.dataset.g!)));
+  const inicial = new URL(location.href).searchParams.get('genero');
+  if (inicial && [...chips].some((c) => c.dataset.g === inicial)) aplicar(inicial);
+</script>

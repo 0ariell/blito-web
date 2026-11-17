@@ -1,0 +1,64 @@
+---
+// Bloques compartidos de la tienda: cómo funciona, licencia y preguntas.
+import { tienda } from '../data/site';
+interface Props { compacto?: boolean }
+const { compacto = false } = Astro.props;
+---
+<div class:list={['ki', { 'ki--compacto': compacto }]}>
+  {!compacto && (
+    <section class="ki__block" aria-labelledby="ki-pasos">
+      <h2 id="ki-pasos" class="ki__h">Cómo es la compra</h2>
+      <ol class="ki__steps" role="list">
+        {tienda.pasos.map((p, i) => <li><span aria-hidden="true">{i + 1}</span><h3>{p.titulo}</h3><p>{p.texto}</p></li>)}
+      </ol>
+    </section>
+  )}
+  <section class="ki__block" aria-labelledby="ki-lic">
+    <h2 id="ki-lic" class="ki__h">Licencia</h2>
+    <div class="ki__lic">
+      <div class="ki__col ki__col--si">
+        <h3>Podés</h3>
+        <ul role="list">{tienda.licencia.podes.map((t) => <li>{t}</li>)}</ul>
+      </div>
+      <div class="ki__col ki__col--no">
+        <h3>No podés</h3>
+        <ul role="list">{tienda.licencia.noPodes.map((t) => <li>{t}</li>)}</ul>
+      </div>
+    </div>
+    <p class="ki__daws">Archivos {tienda.formato}: funcionan en {tienda.daws.slice(0, -1).join(', ')} y {tienda.daws.at(-1)}.</p>
+  </section>
+  <section class="ki__block" aria-labelledby="ki-faq">
+    <h2 id="ki-faq" class="ki__h">Preguntas</h2>
+    <div class="ki__faq">
+      {tienda.faq.map((f) => <details><summary>{f.q}</summary><p>{f.q.startsWith('Perdí') ? <>Entrá a <a href="/kits/mis-compras">Recuperar mis compras</a>, poné el mail con el que compraste y te reenviamos los links.</> : f.a}</p></details>)}
+    </div>
+  </section>
+</div>
+
+<style>
+  .ki { display: grid; gap: clamp(3rem, 6vw, 5rem); }
+  .ki--compacto { gap: 2.6rem; }
+  .ki__h { margin: 0 0 1.2rem; font-family: var(--display); font-variation-settings: 'wdth' 112; font-weight: 800; font-size: var(--step-1); }
+  .ki__steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.4rem); }
+  .ki__steps li { border-top: 2px solid var(--led); padding-top: 1rem; }
+  .ki__steps span { font-family: var(--display); font-variation-settings: 'wdth' 150; font-weight: 900; font-size: 2.4rem; line-height: 1; color: transparent; -webkit-text-stroke: 1.5px var(--led-ink); }
+  .ki__steps h3 { margin: .6rem 0 .3rem; font-size: var(--step-0); }
+  .ki__steps p { margin: 0; color: var(--mute); }
+  .ki__lic { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .ki--compacto .ki__lic { grid-template-columns: 1fr; }
+  .ki__col { padding: 1.2rem 1.3rem; border-radius: 16px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .ki__col h3 { margin: 0 0 .7rem; font-size: var(--step-0); }
+  .ki__col ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+  .ki__col li { display: flex; gap: .6rem; align-items: baseline; color: #d4d6ea; }
+  .ki__col--si li::before { content: '✓'; color: #6cf0a2; font-weight: 800; }
+  .ki__col--no li::before { content: '✕'; color: #ff8a82; font-weight: 800; }
+  .ki__daws { margin: 1rem 0 0; color: var(--mute); font-size: var(--step--1); }
+  .ki__faq details { border-bottom: 1px solid var(--line); }
+  .ki__faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 56px; font-weight: 700; }
+  .ki__faq summary::-webkit-details-marker { display: none; }
+  .ki__faq summary::after { content: '+'; font-size: 1.5rem; font-weight: 400; color: var(--led-ink); transition: transform .2s; }
+  .ki__faq details[open] summary::after { transform: rotate(45deg); }
+  .ki__faq p { margin: 0 0 1.2rem; color: var(--mute); max-width: 60ch; }
+  .ki__faq a { color: var(--led-ink); }
+  @media (max-width: 760px) { .ki__steps, .ki__lic { grid-template-columns: 1fr; } }
+</style>

@@ -1,5 +1,6 @@
 ---
 import KitCover from './KitCover.astro';
+import KitCard from './KitCard.astro';
 import { kits, totalSonidos, ars } from '../data/site';
 const [destacado, ...resto] = kits;
 ---
@@ -8,7 +9,7 @@ const [destacado, ...resto] = kits;
     <div class="sec-head">
       <div>
         <h2 id="kits-t" class="sec-title">Drum kits</h2>
-        <p class="sec-lead">Los sonidos con los que se hacen los temas del estudio. Descarga al instante después de pagar.</p>
+        <p class="sec-lead">Los sonidos con los que se hacen los temas del estudio. Pagás con Mercado Pago y te llegan al mail.</p>
       </div>
       <a href="/kits" class="btn btn--ghost">Ver todos los kits</a>
     </div>
@@ -28,25 +29,14 @@ const [destacado, ...resto] = kits;
         </ul>
         <div class="feat__buy">
           <p class="price"><strong>{ars(destacado.precioArs)}</strong> <span>pago único</span></p>
-          <a href={`/kits/${destacado.slug}`} class="btn">Comprar kit</a>
+          <a href={`/kits/${destacado.slug}`} class="btn">Ver el kit</a>
         </div>
-        <p class="feat__note">{totalSonidos(destacado)} sonidos en WAV. Licencia libre de regalías para tus temas.</p>
+        <p class="feat__note">{totalSonidos(destacado)} sonidos en WAV, libres de regalías para tus temas.</p>
       </div>
     </article>
 
     <ul class="more" role="list">
-      {resto.map((k) => (
-        <li>
-          <a href={`/kits/${k.slug}`} class="mini">
-            <KitCover kit={k} />
-            <span class="mini__txt">
-              <span class="mini__name">{k.nombre} Vol. {Number(k.vol)}</span>
-              <span class="mini__meta">{k.generos.join(', ')}. {totalSonidos(k)} sonidos.</span>
-              <span class="mini__price">{k.estado === 'venta' ? ars(k.precioArs) : 'Próximamente'}</span>
-            </span>
-          </a>
-        </li>
-      ))}
+      {resto.map((k) => <li><KitCard kit={k} /></li>)}
     </ul>
   </div>
 </section>
@@ -58,7 +48,7 @@ const [destacado, ...resto] = kits;
   .feat__cover :global(.kc) { transition: transform .5s var(--ease), box-shadow .3s; }
   .feat__cover:hover :global(.kc) { transform: rotate(-1.5deg) scale(1.01); }
   .feat__tag { display: inline-block; margin: 0 0 1rem; padding: .3rem .8rem; border-radius: 999px; background: var(--led-soft); color: var(--led-ink); font-weight: 700; font-size: var(--step--1); }
-  .feat__name { margin: 0; font-size: clamp(2.6rem, 1.4rem + 4vw, 5.5rem); line-height: .86; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.04em; }
+  .feat__name { margin: 0; font-size: clamp(2.6rem, 1.4rem + 4vw, 5.5rem); line-height: .86; font-weight: 900; font-family: var(--display); font-variation-settings: 'wdth' 125; letter-spacing: -0.04em; }
   .feat__name a { text-decoration: none; }
   .feat__lead { margin: 1rem 0 1.6rem; font-size: var(--step-1); line-height: 1.3; color: var(--mute); max-width: 32ch; }
   .feat__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); max-width: 460px; }
@@ -70,16 +60,9 @@ const [destacado, ...resto] = kits;
   .price span { color: var(--mute); margin-left: .3rem; }
   .feat__note { margin: 1rem 0 0; font-size: var(--step--1); color: var(--mute); }
 
-  .more { list-style: none; margin: clamp(3rem, 6vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
-  .mini > :global(.kc) { width: 100%; }
-  .mini { display: grid; grid-template-columns: 140px 1fr; gap: 1.2rem; align-items: center; padding: 1rem; border-radius: 18px; background: var(--panel); text-decoration: none; box-shadow: inset 0 0 0 1px var(--line); transition: box-shadow .2s, background-color .2s; }
-  .mini:hover { box-shadow: inset 0 0 0 1px var(--led-ink); background: var(--led-soft); }
-  .mini__txt { display: grid; gap: .25rem; }
-  .mini__name { font-size: var(--step-1); font-weight: 900; font-variation-settings: 'wdth' 112; }
-  .mini__meta { color: var(--mute); font-size: var(--step--1); }
-  .mini__price { color: var(--led-ink); font-weight: 700; }
+  .more { list-style: none; margin: clamp(3rem, 6vw, 5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2.5vw, 2rem); }
   @media (max-width: 860px) {
-    .feat, .more { grid-template-columns: 1fr; }
-    .mini { grid-template-columns: 96px 1fr; }
+    .feat { grid-template-columns: 1fr; }
+    .more { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   }
 </style>

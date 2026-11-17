@@ -7,6 +7,7 @@ import { kits } from '../data/site';
 export type Pedido = {
   id: string; kit_slug: string; email: string; estado: 'pendiente' | 'pagado' | 'rechazado';
   monto: number; mp_payment_id: string | null; descargas: number; creado_en: string; pagado_en: string | null;
+  cupon: string | null; precio_lista: number | null; nombre: string | null;
 };
 
 export async function getPedido(id: string): Promise<Pedido | null> {
@@ -34,13 +35,29 @@ export async function procesarPago(paymentId: string) {
     const marcados = (await sql`
       update pedidos set estado = 'pagado', mp_payment_id = ${String(pago.id)}, pagado_en = now()
       where id = ${pedido.id} and estado <> 'pagado' returning *`) as Pedido[];
-    if (marcados[0]) await mandarEntrega(marcados[0]);
+    if (marcados[0]) {
+      if (marcados[0].cupon) await sql`update cupones set usos = usos + 1 where codigo = ${marcados[0].cupon}`;
+      await mandarEntrega(marcados[0]);
+    }
     return marcados[0] ?? (await getPedido(pedido.id));
   }
   if (['rejected', 'cancelled', 'refunded', 'charged_back'].includes(pago.status) && pedido.estado === 'pendiente') {
     await sql`update pedidos set estado = 'rechazado', mp_payment_id = ${String(pago.id)} where id = ${pedido.id}`;
   }
   return getPedido(pedido.id);
+}
+
+/** Reenvía los links de todas las compras pagas de un mail. No revela si el mail tiene compras. */
+export async function reenviarCompras(email: string) {
+  if (!sql) return;
+  const pagos = (await sql`select * from pedidos where email = ${email} and estado = 'pagado' order by pagado_en desc limit 20`) as Pedido[];
+  if (!pagos.length) return;
+  const items = pagos.map((p) => {
+    const kit = kits.find((k) => k.slug === p.kit_slug);
+    const nombre = kit ? `${kit.nombre} Vol. ${Number(kit.vol)}` : p.kit_slug;
+    return `<li style="margin-bottom:10px"><strong>${esc(nombre)}</strong>: <a href="${linkDescarga(p.id)}" style="color:#8a8fff">descargar</a></li>`;
+  }).join('');
+  await enviarMail(email, 'Tus descargas de Blito Producciones', plantilla('Tus compras', `<p>Estos son los links de descarga de tus kits. Cada link dura 7 días.</p><ul style="padding-left:18px">${items}</ul>`));
 }
 
 export async function mandarEntrega(p: Pedido) {

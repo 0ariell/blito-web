@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const paginas = ['/', '/kits', '/kits/cabina-vol-1', '/legales/terminos', '/legales/privacidad', '/arrepentimiento'];
+const paginas = ['/', '/produccion', '/kits', '/kits/cabina-vol-1', '/kits/clande-vol-1', '/kits/mis-compras', '/legales/terminos', '/legales/privacidad', '/arrepentimiento'];
 
 for (const path of paginas) {
   test(`${path} carga sin errores ni CSP rota ni scroll horizontal`, async ({ page }) => {
@@ -113,4 +113,57 @@ test('galería detrás de escena: se desplaza con los botones', async ({ page, i
   await expect(page.getByRole('button', { name: 'Fotos anteriores' })).toBeDisabled();
   await page.getByRole('button', { name: 'Fotos siguientes' }).click();
   await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(100);
+});
+
+test('producción: el botón de mensualidad preselecciona el interés y valida', async ({ page }) => {
+  await page.goto('/produccion');
+  await page.getByRole('link', { name: 'Quiero la mensualidad' }).click();
+  await expect(page.getByRole('radio', { name: 'Mensualidad con acompañamiento' })).toBeChecked();
+  await page.getByRole('button', { name: 'Enviar consulta' }).click();
+  await expect(page.locator('#ce-nombre')).not.toBeEmpty();
+});
+
+test('producción: consulta completa se guarda', async ({ page }) => {
+  test.skip(!process.env.TEST_DATABASE_URL, 'requiere TEST_DATABASE_URL');
+  await page.goto('/produccion?interes=beat#contacto');
+  await expect(page.getByRole('radio', { name: 'Beat a medida' })).toBeChecked();
+  await page.getByLabel('Nombre o nombre artístico').fill('Artista Test');
+  await page.getByLabel('Mail', { exact: true }).fill('artista@test.dev');
+  await page.getByRole('textbox', { name: 'Tu idea' }).fill('Quiero un beat de RKT para un tema que ya tengo escrito.');
+  await page.getByRole('button', { name: 'Enviar consulta' }).click();
+  await expect(page.getByText('¡Listo! Recibimos tu consulta.')).toBeVisible();
+});
+
+test('kits: filtro por género en la URL', async ({ page }) => {
+  await page.goto('/kits');
+  await page.getByRole('button', { name: 'Turreo' }).click();
+  await expect(page).toHaveURL(/genero=turreo/);
+  await expect(page.locator('.kl__grid > li:not([hidden])')).toHaveCount(1);
+});
+
+test('kits: cupón válido baja el precio y uno inválido avisa', async ({ page }) => {
+  test.skip(!process.env.TEST_DATABASE_URL, 'requiere TEST_DATABASE_URL');
+  await page.goto('/kits/cabina-vol-1');
+  await page.getByText('¿Tenés un código de descuento?').click();
+  await page.getByLabel('Código de descuento').fill('nada');
+  await page.getByRole('button', { name: 'Aplicar' }).click();
+  await expect(page.locator('.kd__cmsg')).toContainText('no existe');
+  await page.getByLabel('Código de descuento').fill('prueba10');
+  await page.getByRole('button', { name: 'Aplicar' }).click();
+  await expect(page.locator('.kd__cmsg')).toContainText('10%');
+  await expect(page.locator('.kd__price [data-total]')).toHaveText(/16\.200/);
+});
+
+test('recuperar compras responde igual exista o no el mail', async ({ request }) => {
+  const r = await request.post('/api/mis-compras', { form: { email: 'nadie@test.dev' } });
+  expect(await r.json()).toEqual({ ok: true });
+});
+
+test('panel: pide contraseña y entra con la correcta', async ({ request, browser }) => {
+  expect((await request.get('/admin')).status()).toBe(401);
+  const ctx = await browser.newContext({ httpCredentials: { username: 'blito', password: 'admin-test' } });
+  const p = await ctx.newPage();
+  expect((await p.goto('/admin'))?.status()).toBe(200);
+  await expect(p.getByRole('heading', { name: 'Panel' })).toBeVisible();
+  await ctx.close();
 });

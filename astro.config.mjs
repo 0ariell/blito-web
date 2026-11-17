@@ -12,7 +12,7 @@ export default defineConfig({
   adapter: node({ mode: 'middleware' }),
   integrations: [
     sitemap({
-      filter: (page) => !/\/(compra|api)\//.test(page),
+      filter: (page) => !/\/(compra|api|admin)(\/|$)/.test(page),
       // las páginas de kits se renderizan en el servidor, así que se agregan a mano
       customPages: kits.map((k) => `${site}/kits/${k.slug}`),
     }),

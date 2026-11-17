@@ -24,6 +24,7 @@ export default defineConfig({
         MP_ACCESS_TOKEN: 'TEST-token',
         DOWNLOAD_TOKEN_SECRET: 'test-secret',
         MP_WEBHOOK_SECRET: 'whsec-test',
+        ADMIN_PASSWORD: 'admin-test',
         KIT_ARCHIVOS: JSON.stringify({ 'cabina-vol-1': 'http://localhost:4599/kit.zip' }),
         DATABASE_URL: process.env.TEST_DATABASE_URL ?? '',
       },

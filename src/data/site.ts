@@ -20,15 +20,6 @@ export const contacto = {
   taplink: 'https://taplink.cc/blitormx',
 };
 
-/** Video de portada. Se genera con `scripts/encode-hero.sh` (ver README). */
-export const hero = {
-  activo: true,
-  webm: '/video/hero.webm',
-  mp4: '/video/hero.mp4',
-  mp4Mobile: '/video/hero-mobile.mp4',
-  poster: '/video/hero-poster.jpg',
-};
-
 export type Lanzamiento = {
   tema: string;
   artistas: string;
@@ -73,6 +64,8 @@ export type Kit = {
   precioArs: number;
   /** 'venta' se cobra con Mercado Pago si el servidor tiene credenciales y archivo (ver README). */
   estado: 'venta' | 'proximamente';
+  /** Preview de audio opcional: un mp3 en public/audio/. Si no hay, no se muestra el reproductor. */
+  demo?: string;
 };
 
 export const kits: Kit[] = [
@@ -139,3 +132,91 @@ export const servicios = [
 export const totalSonidos = (k: Kit) => k.contenido.reduce((n, c) => n + c.cantidad, 0);
 const pesos = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 export const ars = (n: number) => pesos.format(n);
+
+// ---------- Producción ----------
+// Textos de la página /produccion. La mensualidad no muestra precio: se cotiza por formulario.
+
+export const produccion = {
+  servicios: [
+    {
+      id: 'beat',
+      titulo: 'Beat a medida',
+      texto: 'Un beat hecho para tu voz y tu tema, no sacado de un pack. Arrancamos desde una referencia o desde cero y lo ajustamos hasta que quede.',
+      incluye: ['Beat exclusivo', 'Cambios hasta que quede', 'Stems para grabar y mezclar'],
+    },
+    {
+      id: 'produccion',
+      titulo: 'Producción completa',
+      texto: 'Del beat al tema terminado: grabación en el estudio, dirección de voz, mezcla y master. Salís con el tema listo para subir.',
+      incluye: ['Beat exclusivo', 'Sesión de grabación', 'Mezcla y master'],
+    },
+    {
+      id: 'mezcla',
+      titulo: 'Mezcla y master',
+      texto: 'Si ya grabaste, nos mandás las pistas y te devolvemos el tema mezclado y masterizado para plataformas.',
+      incluye: ['Mezcla de voces y beat', 'Master para plataformas', 'Una ronda de cambios'],
+    },
+  ],
+  mensualidad: {
+    titulo: 'Mensualidad con Blito',
+    bajada: 'Acompañamiento personalizado, mes a mes, para artistas que quieren crecer con un plan y no tema por tema.',
+    incluye: [
+      'Sesiones uno a uno con Blito, en el estudio o por videollamada',
+      'Devolución de cada tema o maqueta que mandes en el mes',
+      'Producción de tus temas con prioridad en la agenda',
+      'Plan de lanzamientos: qué sacar, cuándo y cómo mostrarlo',
+      'Contacto directo por WhatsApp durante todo el mes',
+    ],
+    para: ['Artistas que están arrancando y quieren hacerlo bien desde el principio', 'Artistas que ya sacan temas y quieren dar el salto'],
+  },
+  proceso: [
+    { titulo: 'Contanos tu idea', texto: 'Completás el formulario con lo que buscás, tu Instagram y algún tema de referencia.' },
+    { titulo: 'Te mandamos una propuesta', texto: 'Blito escucha lo que mandaste y te escribe con una propuesta y el valor.' },
+    { titulo: 'Arrancamos', texto: 'Agendamos la primera sesión y empezamos a trabajar en tu tema.' },
+  ],
+  faq: [
+    { q: '¿Tengo que estar en Buenos Aires?', a: 'No. La grabación es en el estudio, pero las sesiones de la mensualidad, los beats y las mezclas se pueden hacer a distancia.' },
+    { q: '¿Cuánto sale?', a: 'Depende de lo que necesites. Completá el formulario y te mandamos una propuesta con el valor, sin compromiso.' },
+    { q: '¿Los beats son exclusivos?', a: 'Sí. Un beat a medida es solo para vos: no se vende a nadie más.' },
+    { q: '¿Puedo cancelar la mensualidad?', a: 'Sí. Es mes a mes: si un mes no la necesitás, no la renovás.' },
+  ],
+};
+
+export const intereses = [
+  { id: 'mensualidad', label: 'Mensualidad con acompañamiento' },
+  { id: 'beat', label: 'Beat a medida' },
+  { id: 'produccion', label: 'Producción completa' },
+  { id: 'mezcla', label: 'Mezcla y master' },
+  { id: 'otro', label: 'Otra cosa' },
+] as const;
+
+export const waLink = (texto: string) => `${contacto.whatsappUrl}?text=${encodeURIComponent(texto)}`;
+
+// ---------- Tienda ----------
+export const tienda = {
+  formato: 'WAV',
+  daws: ['FL Studio', 'Ableton Live', 'Logic Pro', 'Studio One', 'Reaper', 'Cubase'],
+  licencia: {
+    podes: [
+      'Usar los sonidos en tus temas, beats y producciones',
+      'Publicar y monetizar esos temas en plataformas y redes',
+      'Vender beats hechos con los sonidos',
+    ],
+    noPodes: [
+      'Revender o compartir los sonidos sueltos',
+      'Meterlos en otro kit, librería o banco de sonidos',
+    ],
+  },
+  pasos: [
+    { titulo: 'Elegís el kit', texto: 'Escuchás la descripción, mirás qué trae y lo agregás.' },
+    { titulo: 'Pagás con Mercado Pago', texto: 'Con tarjeta, débito o dinero en cuenta. No vemos tus datos de pago.' },
+    { titulo: 'Te llega al mail', texto: 'Apenas se acredita el pago te mandamos el link de descarga.' },
+  ],
+  faq: [
+    { q: '¿Cómo lo recibo?', a: 'Después de pagar te llega un mail con el link de descarga. Es un .zip con todos los sonidos en WAV. El link dura 7 días.' },
+    { q: '¿Puedo usarlo en temas que publico?', a: 'Sí. Podés usar los sonidos en tus temas y beats, publicarlos y monetizarlos sin pagar regalías. Lo que no podés es revender los sonidos sueltos.' },
+    { q: '¿Funciona en mi programa?', a: 'Sí. Son archivos WAV: funcionan en FL Studio, Ableton, Logic, Studio One, Reaper y cualquier programa de producción.' },
+    { q: 'Perdí el mail de descarga', a: 'Entrá a "Recuperar mis compras", poné el mail con el que compraste y te reenviamos los links.' },
+    { q: '¿Me puedo arrepentir de la compra?', a: 'Tenés 10 días corridos desde la compra para pedirlo con el Botón de arrepentimiento, al pie de cualquier página.' },
+  ],
+};

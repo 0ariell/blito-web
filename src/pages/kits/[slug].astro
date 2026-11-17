@@ -1,84 +1,100 @@
 ---
 import Base from '../../layouts/Base.astro';
 import KitCover from '../../components/KitCover.astro';
-import { kits, totalSonidos, ars } from '../../data/site';
+import KitCard from '../../components/KitCard.astro';
+import KitsInfo from '../../components/KitsInfo.astro';
+import { kits, totalSonidos, ars, tienda } from '../../data/site';
 import { ventaHabilitada } from '../../lib/env';
 
 // Se renderiza en el servidor: el botón de compra depende de que el cobro esté configurado.
 export const prerender = false;
 const kit = kits.find((k) => k.slug === Astro.params.slug);
 if (!kit) return Astro.rewrite('/404');
+const nombre = `${kit.nombre} Vol. ${Number(kit.vol)}`;
 const vendible = kit.estado === 'venta' && ventaHabilitada(kit.slug);
 const error = Astro.url.searchParams.get('error');
 const url = new URL(`/kits/${kit.slug}`, Astro.site).href;
+const otros = kits.filter((k) => k.slug !== kit.slug);
 const jsonld = [
   {
-    '@context': 'https://schema.org',
-    '@type': 'Product',
-    name: `${kit.nombre} Vol. ${Number(kit.vol)}`,
-    description: kit.descripcion,
-    category: 'Drum kit',
-    image: new URL('/og.jpg', Astro.site).href,
-    brand: { '@type': 'Brand', name: 'Blito Producciones' },
-    offers: {
-      '@type': 'Offer',
-      url,
-      price: kit.precioArs,
-      priceCurrency: 'ARS',
-      availability: vendible ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder',
-    },
+    '@context': 'https://schema.org', '@type': 'Product', name: nombre, description: kit.descripcion, category: 'Drum kit',
+    image: new URL('/og.jpg', Astro.site).href, brand: { '@type': 'Brand', name: 'Blito Producciones' },
+    offers: { '@type': 'Offer', url, price: kit.precioArs, priceCurrency: 'ARS', availability: vendible ? 'https://schema.org/InStock' : 'https://schema.org/PreOrder' },
   },
   {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Drum kits', item: new URL('/kits', Astro.site).href },
-      { '@type': 'ListItem', position: 2, name: `${kit.nombre} Vol. ${Number(kit.vol)}`, item: url },
+      { '@type': 'ListItem', position: 2, name: nombre, item: url },
     ],
   },
 ];
-const otros = kits.filter((k) => k.slug !== kit.slug);
-const faq = [
-  { q: '¿Cómo lo recibo?', a: 'Después de pagar te llega un mail con el link de descarga. El archivo es un .zip con todos los sonidos en WAV.' },
-  { q: '¿Puedo usarlo en temas que publico?', a: 'Sí. Podés usar los sonidos en tus temas, comerciales o no, sin pagar regalías. Lo que no podés es revender los sonidos sueltos o en otro kit.' },
-  { q: '¿Sirve para FL Studio, Ableton o cualquier DAW?', a: 'Sí. Son archivos WAV, funcionan en cualquier programa.' },
-  { q: '¿Me puedo arrepentir de la compra?', a: 'Tenés 10 días corridos desde la compra para pedirlo con el Botón de arrepentimiento, al pie de cualquier página. Te respondemos con un código de trámite.' },
-];
 ---
-<Base title={`${kit.nombre} Vol. ${Number(kit.vol)}: drum kit de Blito`} description={kit.bajada} jsonld={jsonld}>
-  <article class="sec kd">
+<Base title={`${nombre}: drum kit de Blito`} description={`${kit.bajada} ${totalSonidos(kit)} sonidos en WAV para ${kit.generos.join(', ')}.`} jsonld={jsonld}>
+  <article class="kd">
     <div class="wrap">
-      <a href="/kits" class="kd__back">Todos los kits</a>
+      <nav class="crumbs" aria-label="Ubicación">
+        <a href="/kits">Drum kits</a><span aria-hidden="true">/</span><span aria-current="page" translate="no">{nombre}</span>
+      </nav>
+
       <div class="kd__grid">
-        <div class="kd__cover"><KitCover kit={kit} size="lg" /></div>
-        <div>
-          <p class="kd__genres">{kit.generos.join(', ')}</p>
-          <h1 class="kd__name">{kit.nombre} <span>Vol. {Number(kit.vol)}</span></h1>
+        <div class="kd__media">
+          <KitCover kit={kit} size="lg" />
+          {kit.demo && (
+            <figure class="kd__demo">
+              <figcaption>Escuchá una muestra</figcaption>
+              <audio controls preload="none" src={kit.demo}></audio>
+            </figure>
+          )}
+        </div>
+
+        <div class="kd__main">
+          <p class="kd__genres">{kit.generos.join(' · ')}</p>
+          <h1 class="kd__name" translate="no">{kit.nombre} <span>Vol. {Number(kit.vol)}</span></h1>
           <p class="kd__lead">{kit.bajada}</p>
           <p class="kd__desc">{kit.descripcion}</p>
 
           <div class="kd__buy" id="comprar">
-            <p class="kd__price"><strong>{ars(kit.precioArs)}</strong> <span>pago único en pesos</span></p>
+            <div class="kd__price">
+              <strong data-total>{ars(kit.precioArs)}</strong>
+              <s data-lista hidden>{ars(kit.precioArs)}</s>
+              <span>pago único · {totalSonidos(kit)} sonidos en {tienda.formato}</span>
+            </div>
+
             {vendible ? (
               <form class="kd__form" method="post" action="/api/checkout" data-checkout>
                 <input type="hidden" name="kit" value={kit.slug} />
-                <label class="kd__label" for="buy-email">Tu mail</label>
-                <input id="buy-email" class="kd__input" name="email" type="email" required autocomplete="email" placeholder="tu@mail.com" aria-describedby="buy-help" spellcheck="false" />
-                <p class="kd__help" id="buy-help">Ahí te llega el link de descarga apenas se acredita el pago.</p>
+                <div class="field">
+                  <label for="buy-email">Tu mail</label>
+                  <input id="buy-email" class="kd__input" name="email" type="email" required autocomplete="email" spellcheck="false" placeholder="tu@mail.com" aria-describedby="buy-help" />
+                  <p class="field__hint" id="buy-help">Ahí te llega el link de descarga apenas se acredita el pago.</p>
+                </div>
+                <details class="kd__coupon" data-coupon>
+                  <summary>¿Tenés un código de descuento?</summary>
+                  <div class="kd__crow">
+                    <label class="visually-hidden" for="buy-cupon">Código de descuento</label>
+                    <input id="buy-cupon" class="kd__input" name="cupon" autocomplete="off" spellcheck="false" autocapitalize="characters" placeholder="CÓDIGO" />
+                    <button type="button" class="btn btn--ghost" data-aplicar>Aplicar</button>
+                  </div>
+                  <p class="kd__cmsg" role="status" aria-live="polite"></p>
+                </details>
                 <label class="kd__check">
                   <input type="checkbox" name="acepta" required />
-                  <span>Acepto los <a href="/legales/terminos">términos y condiciones</a>.</span>
+                  <span>Acepto los <a href="/legales/terminos" target="_blank">términos y condiciones</a> y la licencia de uso.</span>
                 </label>
                 {error && <p class="kd__err" role="alert">{error}</p>}
                 <button class="btn kd__cta" type="submit">Pagar con Mercado Pago</button>
-                <p class="kd__secure">Pagás en Mercado Pago con tarjeta, débito o dinero en cuenta. Nosotros no vemos tus datos de pago.</p>
+                <p class="kd__secure">
+                  <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M7 10V8a5 5 0 0110 0v2M6 10h12v10H6z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+                  Pagás en Mercado Pago con tarjeta, débito o dinero en cuenta. No vemos tus datos de pago.
+                </p>
               </form>
             ) : (
               <form class="kd__wait" method="post" action="/api/suscribir" data-subscribe data-ok-msg="Listo. Te escribimos el día que salga a la venta.">
-                <p class="kd__waittxt"><span class="kd__badge">{kit.estado === 'venta' ? 'Preventa' : 'Próximamente'}</span> Dejá tu mail y te avisamos el día que salga a la venta.</p>
+                <p class="kd__waittxt"><span class="kd__badge">{kit.estado === 'venta' ? 'Preventa' : 'Próximamente'}</span>Dejá tu mail y te avisamos el día que salga a la venta.</p>
                 <div class="kd__row">
                   <label class="visually-hidden" for="kit-email">Tu mail para el aviso</label>
-                  <input id="kit-email" name="email" type="email" required autocomplete="email" placeholder="tu@mail.com" spellcheck="false" />
+                  <input id="kit-email" class="kd__input" name="email" type="email" required autocomplete="email" spellcheck="false" placeholder="tu@mail.com" />
                   <input type="hidden" name="origen" value={`kit:${kit.slug}`} />
                   <button class="btn" type="submit">Avisame</button>
                 </div>
@@ -87,86 +103,160 @@ const faq = [
             )}
           </div>
 
-          <h2 class="kd__h2">Qué trae</h2>
-          <ul class="kd__list" role="list">
-            {kit.contenido.map((c) => <li><span>{c.item}</span><span>{c.cantidad}</span></li>)}
-            <li class="kd__total"><span>Total</span><span>{totalSonidos(kit)} sonidos en WAV</span></li>
-          </ul>
+          <section class="kd__sec" aria-labelledby="kd-trae">
+            <h2 id="kd-trae" class="kd__h2">Qué trae</h2>
+            <table class="kd__table">
+              <caption class="visually-hidden">Contenido del kit</caption>
+              <tbody>
+                {kit.contenido.map((c) => <tr><th scope="row">{c.item}</th><td>{c.cantidad}</td></tr>)}
+              </tbody>
+              <tfoot><tr><th scope="row">Total</th><td>{totalSonidos(kit)} sonidos</td></tr></tfoot>
+            </table>
+          </section>
 
-          <h2 class="kd__h2">Preguntas</h2>
-          <div class="kd__faq">
-            {faq.map((f) => (
-              <details>
-                <summary>{f.q}</summary>
-                <p>{f.a}</p>
-              </details>
-            ))}
-          </div>
+          <div class="kd__sec"><KitsInfo compacto /></div>
         </div>
       </div>
 
-      <h2 class="kd__h2 kd__more">Otros kits</h2>
-      <ul class="kd__others" role="list">
-        {otros.map((k) => (
-          <li><a href={`/kits/${k.slug}`}><KitCover kit={k} /><span>{k.nombre} Vol. {Number(k.vol)}</span></a></li>
-        ))}
-      </ul>
+      {otros.length > 0 && (
+        <section class="kd__more" aria-labelledby="kd-otros">
+          <h2 id="kd-otros" class="sec-title">Otros kits</h2>
+          <ul class="kd__others" role="list">{otros.map((k) => <li><KitCard kit={k} /></li>)}</ul>
+        </section>
+      )}
     </div>
+
+    {vendible && (
+      <div class="kd__sticky" data-sticky aria-hidden="true">
+        <span><strong translate="no">{nombre}</strong><span data-total>{ars(kit.precioArs)}</span></span>
+        <a class="btn" href="#comprar" tabindex="-1">Comprar</a>
+      </div>
+    )}
   </article>
 </Base>
 
 <style>
-  .kd { padding-top: 120px; }
-  .kd__back { display: inline-flex; min-height: 44px; align-items: center; color: var(--mute); text-decoration: none; font-weight: 600; margin-bottom: 1.5rem; }
-  .kd__back::before { content: ''; width: .5em; height: .5em; border-left: 2px solid; border-bottom: 2px solid; transform: rotate(45deg); margin-right: .6em; }
-  .kd__back:hover { color: #fff; }
+  .kd { padding: 116px 0 clamp(4rem, 8vw, 7rem); }
+  .crumbs { display: flex; gap: .6rem; align-items: center; color: var(--mute); font-size: var(--step--1); margin-bottom: 1.6rem; }
+  .crumbs a { color: var(--mute); text-underline-offset: .25em; padding-block: .6rem; }
+  .crumbs a:hover { color: #fff; }
+  .crumbs [aria-current] { color: #fff; }
   .kd__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
-  .kd__cover { position: sticky; top: 100px; }
+  .kd__media { position: sticky; top: 100px; }
+  .kd__demo { margin: 1rem 0 0; padding: 1rem; border-radius: 14px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .kd__demo figcaption { font-weight: 700; margin-bottom: .6rem; }
+  .kd__demo audio { width: 100%; }
   .kd__genres { margin: 0 0 .8rem; color: var(--led-ink); font-weight: 700; }
-  .kd__name { margin: 0; font-size: clamp(3rem, 1.4rem + 5vw, 6.5rem); line-height: .84; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.045em; }
+  .kd__name { margin: 0; font-family: var(--display); font-variation-settings: 'wdth' 125; font-weight: 900; font-size: clamp(3rem, 1.4rem + 5vw, 6.5rem); line-height: .84; letter-spacing: -0.045em; overflow-wrap: anywhere; }
   .kd__name span { display: block; color: transparent; -webkit-text-stroke: 1.5px #fff; }
   .kd__lead { margin: 1.4rem 0 .6rem; font-size: var(--step-1); font-weight: 600; line-height: 1.3; }
-  .kd__desc { margin: 0; color: var(--mute); max-width: 52ch; }
-  .kd__buy { margin-top: 2rem; padding: 1.5rem; border-radius: 18px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
-  .kd__price { margin: 0 0 1rem; }
-  .kd__price strong { font-size: var(--step-3); font-weight: 900; font-variation-settings: 'wdth' 110; letter-spacing: -0.03em; }
-  .kd__price span { color: var(--mute); margin-left: .4rem; }
-  .kd__cta { width: 100%; min-height: 56px; font-size: var(--step-1); margin-top: .4rem; }
-  .kd__form { display: grid; gap: .6rem; }
-  .kd__label { font-weight: 700; }
-  .kd__input { min-height: 52px; padding: 0 1.1rem; border-radius: 12px; background: #000; border: 1px solid var(--line); color: #fff; font: inherit; }
+  .kd__desc { margin: 0; color: var(--mute); max-width: 54ch; }
+
+  .kd__buy { margin-top: 2rem; padding: clamp(1.2rem, 2.5vw, 1.8rem); border-radius: 20px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .kd__price { display: flex; flex-wrap: wrap; align-items: baseline; gap: .3rem .8rem; margin-bottom: 1.2rem; }
+  .kd__price strong { font-family: var(--display); font-variation-settings: 'wdth' 112; font-weight: 900; font-size: var(--step-3); letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+  .kd__price s { color: var(--mute); font-size: var(--step-1); }
+  .kd__price span { flex-basis: 100%; color: var(--mute); font-size: var(--step--1); }
+  .kd__form { display: grid; gap: 1rem; }
+  .kd__input { width: 100%; min-height: 52px; padding: 0 1.1rem; border-radius: 12px; background: #000; border: 1px solid var(--line); color: #fff; font: inherit; }
   .kd__input:focus { outline: none; border-color: var(--led-ink); box-shadow: 0 0 0 3px var(--led-soft); }
-  .kd__help, .kd__secure { margin: 0; font-size: var(--step--1); color: var(--mute); }
+  .kd__coupon summary { cursor: pointer; color: var(--led-ink); font-weight: 600; min-height: 44px; display: flex; align-items: center; width: fit-content; }
+  .kd__crow { display: flex; gap: .6rem; margin-top: .4rem; }
+  .kd__crow .kd__input { text-transform: uppercase; letter-spacing: .06em; }
+  .kd__cmsg { margin: .5rem 0 0; font-size: var(--step--1); font-weight: 600; }
+  .kd__cmsg:empty { display: none; }
+  .kd__cmsg.is-ok { color: #6cf0a2; }
+  .kd__cmsg.is-bad { color: #ff8a82; }
   .kd__check { display: flex; gap: .7rem; align-items: center; min-height: 44px; cursor: pointer; }
   .kd__check input { width: 20px; height: 20px; accent-color: var(--led); flex: none; }
   .kd__check a { color: var(--led-ink); }
   .kd__err { margin: 0; padding: .7rem .9rem; border-radius: 10px; background: rgba(255,90,80,.12); color: #ff9b94; font-weight: 600; }
-  .kd__badge { display: inline-block; margin-right: .4rem; padding: .15rem .6rem; border-radius: 999px; background: var(--led-soft); color: var(--led-ink); font-weight: 700; font-size: var(--step--1); }
+  .kd__cta { width: 100%; min-height: 58px; font-size: var(--step-1); }
+  .kd__secure { display: flex; gap: .5rem; align-items: flex-start; margin: 0; font-size: var(--step--1); color: var(--mute); }
+  .kd__secure svg { flex: none; margin-top: .15rem; }
   .kd__waittxt { margin: 0 0 .9rem; color: var(--mute); }
+  .kd__badge { display: inline-block; margin-right: .5rem; padding: .15rem .6rem; border-radius: 999px; background: var(--led-soft); color: var(--led-ink); font-weight: 700; font-size: var(--step--1); }
   .kd__row { display: flex; gap: .6rem; }
-  .kd__row input { flex: 1; min-width: 0; min-height: 50px; padding: 0 1.1rem; border-radius: 999px; background: #000; border: 1px solid var(--line); color: #fff; font: inherit; }
-  .kd__row input:focus { outline: none; border-color: var(--led-ink); }
+  .kd__row .kd__input { border-radius: 999px; }
   .kd__status { margin: .8rem 0 0; font-weight: 600; color: var(--led-ink); }
   .kd__status:empty { display: none; }
-  .kd__h2 { margin: 2.8rem 0 1rem; font-size: var(--step-1); font-weight: 900; font-variation-settings: 'wdth' 112; }
-  .kd__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
-  .kd__list li { display: flex; justify-content: space-between; gap: 1rem; padding: .75rem 0; border-bottom: 1px solid var(--line); }
-  .kd__list li span:last-child { font-weight: 700; font-variant-numeric: tabular-nums; }
-  .kd__total { color: var(--led-ink); }
-  .kd__faq details { border-bottom: 1px solid var(--line); }
-  .kd__faq summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 56px; font-weight: 700; }
-  .kd__faq summary::-webkit-details-marker { display: none; }
-  .kd__faq summary::after { content: '+'; font-size: 1.5rem; font-weight: 400; color: var(--led-ink); transition: transform .2s; }
-  .kd__faq details[open] summary::after { transform: rotate(45deg); }
-  .kd__faq p { margin: 0 0 1.2rem; color: var(--mute); max-width: 56ch; }
-  .kd__more { margin-top: clamp(4rem, 8vw, 7rem); }
-  .kd__others { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; }
-  .kd__others a { display: grid; gap: .6rem; text-decoration: none; font-weight: 800; }
-  .kd__others a:hover span { color: var(--led-ink); }
+
+  .kd__sec { margin-top: clamp(2.6rem, 5vw, 3.6rem); }
+  .kd__h2 { margin: 0 0 1rem; font-family: var(--display); font-variation-settings: 'wdth' 112; font-weight: 800; font-size: var(--step-1); }
+  .kd__table { width: 100%; border-collapse: collapse; }
+  .kd__table th, .kd__table td { padding: .8rem 0; border-bottom: 1px solid var(--line); text-align: left; font-weight: 400; }
+  .kd__table td { text-align: right; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .kd__table tfoot th, .kd__table tfoot td { color: var(--led-ink); font-weight: 700; border-bottom: 0; }
+
+  .kd__more { margin-top: clamp(5rem, 10vw, 8rem); }
+  .kd__others { list-style: none; margin: 2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2.5vw, 2rem); }
+
+  .kd__sticky { display: none; }
   @media (max-width: 860px) {
     .kd__grid { grid-template-columns: 1fr; }
-    .kd__cover { position: static; max-width: 480px; }
+    .kd__media { position: static; max-width: 460px; }
     .kd__others { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .kd__row { flex-direction: column; }
+    .kd__sticky {
+      display: flex; position: fixed; z-index: 30; left: 0; right: 0; bottom: 0; align-items: center; justify-content: space-between; gap: 1rem;
+      padding: .8rem max(var(--gutter), env(safe-area-inset-left)) calc(.8rem + env(safe-area-inset-bottom));
+      background: rgba(0,0,0,.88); backdrop-filter: blur(14px); box-shadow: 0 -1px 0 var(--line);
+      transform: translateY(110%); transition: transform .25s var(--ease);
+    }
+    .kd__sticky.is-on { transform: none; }
+    .kd__sticky > span { display: grid; line-height: 1.2; }
+    .kd__sticky strong { font-size: var(--step--1); }
+    .kd__sticky [data-total] { font-weight: 800; font-variant-numeric: tabular-nums; }
   }
 </style>
+
+<script>
+  // Cupón: se valida en el servidor y actualiza el total (el precio final se recalcula al pagar).
+  const form = document.querySelector<HTMLFormElement>('[data-checkout]');
+  if (form) {
+    const input = form.querySelector<HTMLInputElement>('#buy-cupon')!;
+    const msg = form.querySelector<HTMLElement>('.kd__cmsg')!;
+    const totals = document.querySelectorAll<HTMLElement>('[data-total]');
+    const lista = document.querySelector<HTMLElement>('[data-lista]')!;
+    const original = totals[0].textContent!;
+    const btn = form.querySelector<HTMLButtonElement>('[data-aplicar]')!;
+    const reset = () => { totals.forEach((t) => (t.textContent = original)); lista.hidden = true; };
+    const aplicar = async () => {
+      if (!input.value.trim()) { reset(); msg.textContent = ''; return; }
+      btn.disabled = true; btn.textContent = 'Validando…';
+      const fd = new FormData(); fd.set('kit', form.querySelector<HTMLInputElement>('[name=kit]')!.value); fd.set('codigo', input.value);
+      try {
+        const r = await (await fetch('/api/cupon', { method: 'POST', body: fd })).json();
+        msg.className = 'kd__cmsg ' + (r.ok ? 'is-ok' : 'is-bad');
+        if (r.ok) {
+          input.value = r.codigo;
+          totals.forEach((t) => (t.textContent = r.totalTexto));
+          lista.hidden = false;
+          msg.textContent = `Código ${r.codigo} aplicado: ${r.porcentaje}% de descuento.`;
+        } else { reset(); msg.textContent = r.error; }
+      } catch { msg.className = 'kd__cmsg is-bad'; msg.textContent = 'No pudimos validar el código. Probá de nuevo.'; }
+      finally { btn.disabled = false; btn.textContent = 'Aplicar'; }
+    };
+    btn.addEventListener('click', aplicar);
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); aplicar(); } });
+    form.addEventListener('submit', (e) => {
+      if (!form.checkValidity()) { e.preventDefault(); form.reportValidity(); return; }
+      const b = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+      b.disabled = true; b.textContent = 'Yendo a Mercado Pago…';
+    });
+    // Si el pago se cancela y vuelve con error, reabrimos el cupón cargado.
+    if (location.hash === '#comprar') document.getElementById('comprar')?.scrollIntoView();
+  }
+
+  // Barra de compra fija en el celular: aparece cuando el bloque de compra sale de pantalla.
+  const sticky = document.querySelector<HTMLElement>('[data-sticky]');
+  const buy = document.getElementById('comprar');
+  if (sticky && buy) {
+    new IntersectionObserver(([e]) => {
+      const on = !e.isIntersecting && e.boundingClientRect.top < 0;
+      sticky.classList.toggle('is-on', on);
+      sticky.setAttribute('aria-hidden', String(!on));
+      sticky.querySelector('a')!.tabIndex = on ? 0 : -1;
+    }).observe(buy);
+  }
+</script>

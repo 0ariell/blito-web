@@ -15,12 +15,22 @@ import { contacto } from '../data/site';
         </div>
         <p class="ft__status" role="status" aria-live="polite"></p>
       </form>
-      <nav class="ft__links" aria-label="Redes y contacto">
-        <a href={contacto.igSello}>Instagram del sello</a>
-        <a href={contacto.igBlito}>Instagram de Blito</a>
-        <a href={contacto.youtube}>YouTube</a>
-        <a href={contacto.whatsappUrl}>WhatsApp</a>
-      </nav>
+      <div class="ft__cols">
+        <nav class="ft__links" aria-label="Sitio">
+          <p>Sitio</p>
+          <a href="/produccion">Producción y mensualidad</a>
+          <a href="/kits">Drum kits</a>
+          <a href="/kits/mis-compras">Recuperar mis compras</a>
+          <a href="/#demo">Mandá tu demo al sello</a>
+        </nav>
+        <nav class="ft__links" aria-label="Redes y contacto">
+          <p>Seguinos</p>
+          <a href={contacto.igSello} target="_blank" rel="noopener">Instagram del sello</a>
+          <a href={contacto.igBlito} target="_blank" rel="noopener">Instagram de Blito</a>
+          <a href={contacto.youtube} target="_blank" rel="noopener">YouTube</a>
+          <a href={`${contacto.whatsappUrl}?text=${encodeURIComponent('Hola Blito, te escribo desde la web.')}`} target="_blank" rel="noopener">WhatsApp</a>
+        </nav>
+      </div>
     </div>
     <p class="ft__mark" aria-hidden="true" translate="no">BLITO</p>
     <div class="ft__base">
@@ -38,7 +48,7 @@ import { contacto } from '../data/site';
 <style>
   .ft { border-top: 1px solid var(--line); padding-top: clamp(3rem, 7vw, 6rem); overflow: hidden; }
   .ft__grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 3rem; }
-  .ft__news h2 { margin: 0; font-size: var(--step-2); line-height: 1; font-weight: 900; font-variation-settings: 'wdth' 118; letter-spacing: -0.02em; }
+  .ft__news h2 { margin: 0; font-size: var(--step-2); line-height: 1; font-weight: 900; font-family: var(--display); font-variation-settings: 'wdth' 125; letter-spacing: -0.02em; }
   .ft__news > p { margin: .6rem 0 1.4rem; color: var(--mute); }
   .ft__row { display: flex; gap: .6rem; max-width: 520px; }
   .ft__row input {
@@ -49,12 +59,14 @@ import { contacto } from '../data/site';
   .ft__row input:focus { outline: none; border-color: var(--led-ink); }
   .ft__status { margin: .8rem 0 0; font-weight: 600; color: var(--led-ink); }
   .ft__status:empty { display: none; }
-  .ft__links { display: grid; gap: .3rem; justify-items: start; align-content: start; }
+  .ft__cols { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+  .ft__links { display: grid; gap: .1rem; justify-items: start; align-content: start; }
+  .ft__links p { margin: 0 0 .4rem; color: var(--mute); font-size: var(--step--1); }
   .ft__links a { text-decoration: none; font-weight: 600; padding-block: .45rem; }
   .ft__links a:hover { color: var(--led-ink); }
-  .ft__mark {
+  .ft__mark { font-variation-settings: 'wdth' 150 !important; font-size: clamp(4rem, 19.4vw, 19rem) !important;
     margin: clamp(3rem, 7vw, 6rem) -0.04em 0; font-size: clamp(4.5rem, 24.2vw, 22rem); line-height: .78;
-    font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.045em;
+    font-weight: 900; font-family: var(--display); font-variation-settings: 'wdth' 125; letter-spacing: -0.045em;
     color: transparent; -webkit-text-stroke: 1px var(--line);
   }
   .ft__base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; padding-block: 1.5rem 2rem; font-size: var(--step--1); color: var(--mute); }

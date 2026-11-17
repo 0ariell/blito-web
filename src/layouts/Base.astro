@@ -1,6 +1,8 @@
 ---
-import '@fontsource-variable/archivo/wdth.css';
-import archivo from '@fontsource-variable/archivo/files/archivo-latin-wdth-normal.woff2?url';
+import '@fontsource-variable/anybody/wdth.css';
+import '@fontsource-variable/mona-sans/wdth.css';
+import anybody from '@fontsource-variable/anybody/files/anybody-latin-wdth-normal.woff2?url';
+import mona from '@fontsource-variable/mona-sans/files/mona-sans-latin-wdth-normal.woff2?url';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { marca, contacto } from '../data/site';
@@ -55,7 +57,8 @@ const schemas = [org, ...(jsonld ? [jsonld].flat() : [])];
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    {preloadFont && <link rel="preload" href={archivo} as="font" type="font/woff2" crossorigin />}
+    {preloadFont && <link rel="preload" href={anybody} as="font" type="font/woff2" crossorigin />}
+    {preloadFont && <link rel="preload" href={mona} as="font" type="font/woff2" crossorigin />}
     {schemas.map((s) => <script type="application/ld+json" set:html={JSON.stringify(s)} />)}
     <slot name="head" />
   </head>
@@ -89,12 +92,15 @@ const schemas = [org, ...(jsonld ? [jsonld].flat() : [])];
     --step-2: clamp(1.6rem, 1.3rem + 1.4vw, 2.6rem);
     --step-3: clamp(2.4rem, 1.5rem + 3.8vw, 5.2rem);
     --ease: cubic-bezier(.2, .7, .1, 1);
+    /* Anybody: títulos y marca (eje de ancho 50 a 150). Mona Sans: texto. */
+    --display: 'Anybody Variable', 'Arial Black', system-ui, sans-serif;
+    --text: 'Mona Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
   }
   *, *::before, *::after { box-sizing: border-box; }
   html { scroll-behavior: smooth; scroll-padding-top: 76px; -webkit-text-size-adjust: 100%; background: var(--black); }
   body {
     margin: 0; background: var(--black); color: var(--white);
-    font-family: 'Archivo Variable', 'Archivo', system-ui, sans-serif; font-size: var(--step-0);
+    font-family: var(--text); font-size: var(--step-0);
     font-variation-settings: 'wdth' 100; line-height: 1.5;
     -webkit-font-smoothing: antialiased; overflow-x: hidden;
     touch-action: manipulation; -webkit-tap-highlight-color: transparent;
@@ -116,9 +122,11 @@ const schemas = [org, ...(jsonld ? [jsonld].flat() : [])];
   .sec { padding-block: clamp(4.5rem, 10vw, 9rem); }
   .sec-head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 1rem 2rem; margin-bottom: clamp(2rem, 4vw, 3.5rem); }
   .sec-title {
-    margin: 0; font-size: var(--step-3); line-height: .88; font-weight: 900;
-    font-variation-settings: 'wdth' 125; letter-spacing: -0.035em;
+    margin: 0; font-size: var(--step-3); line-height: .9; font-weight: 900;
+    font-family: var(--display); font-variation-settings: 'wdth' 125; letter-spacing: -0.035em;
   }
+  @media (max-width: 1100px) { .sec-title { font-variation-settings: 'wdth' 110; } }
+  @media (max-width: 600px) { .sec-title { font-variation-settings: 'wdth' 100; font-size: clamp(2.1rem, 10.5vw, 3.2rem); } }
   .sec-lead { margin: .8rem 0 0; max-width: 44ch; color: var(--mute); }
 
   /* Formularios */
@@ -140,6 +148,9 @@ const schemas = [org, ...(jsonld ? [jsonld].flat() : [])];
   .form .btn { justify-self: start; }
   .form__status { margin: 0; font-weight: 700; color: var(--led-ink); }
   .form__status:empty { display: none; }
+
+  /* Campo trampa para bots: invisible para personas y lectores de pantalla */
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
   /* Botones */
   .btn {

@@ -10,20 +10,16 @@ import Player from '../components/Player.astro';
 import About from '../components/About.astro';
 import Gallery from '../components/Gallery.astro';
 import { getImage } from 'astro:assets';
-import { hero } from '../data/site';
 import { img } from '../lib/img';
-// Preload de la imagen del hero (LCP) para que el navegador la pida antes de leer el CSS.
-const heroImg = hero.activo ? null : await getImage({ src: img('blito-night.jpg'), widths: [480, 785], format: 'webp' });
+// Preload de la figura del hero (LCP) para que el navegador la pida antes de leer el CSS.
+const heroImg = await getImage({ src: img('blito-hero.png'), widths: [480, 760, 1007], format: 'webp', quality: 86 });
 ---
 <Base
   title="Blito Producciones: productora, sello y drum kits"
   description="Productora y sello de Buenos Aires. Beats, grabación, mezcla, lanzamientos y drum kits para RKT, trap y turreo."
 >
-  {heroImg && (
-    <link slot="head" rel="preload" as="image" type="image/webp" fetchpriority="high"
-      imagesrcset={heroImg.srcSet.attribute} imagesizes="(min-width: 900px) 46vw, 100vw" />
-  )}
-  {hero.activo && <link slot="head" rel="preload" as="image" href={hero.poster} fetchpriority="high" />}
+  <link slot="head" rel="preload" as="image" type="image/webp" fetchpriority="high"
+    imagesrcset={heroImg.srcSet.attribute} imagesizes="(min-width: 900px) 52vw, 96vw" />
   <Hero />
   <Releases />
   <About />

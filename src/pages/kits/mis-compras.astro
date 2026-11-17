@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Recuperar mis compras · Blito Producciones" description="Te reenviamos los links de descarga de los kits que compraste.">
+  <section class="sec mc">
+    <div class="wrap mc__in">
+      <a href="/kits" class="mc__back">Drum kits</a>
+      <h1 class="mc__t">Recuperar mis compras</h1>
+      <p class="mc__p">Poné el mail con el que compraste y te reenviamos los links de descarga de todos tus kits.</p>
+      <form class="mc__form" method="post" action="/api/mis-compras" data-recuperar>
+        <label for="mc-email">Mail de la compra</label>
+        <div class="mc__row">
+          <input id="mc-email" name="email" type="email" required autocomplete="email" spellcheck="false" placeholder="tu@mail.com" />
+          <button class="btn" type="submit">Reenviar links</button>
+        </div>
+        <p class="mc__status" role="status" aria-live="polite"></p>
+      </form>
+      <p class="mc__help">¿No te llega nada? Revisá spam o <a href="https://wa.me/5491135896893?text=Hola%2C%20compr%C3%A9%20un%20kit%20y%20no%20me%20lleg%C3%B3%20el%20link" target="_blank" rel="noopener">escribinos por WhatsApp</a> con el número de pedido.</p>
+    </div>
+  </section>
+</Base>
+<style>
+  .mc { min-height: 80svh; padding-top: 140px; }
+  .mc__in { max-width: 720px; }
+  .mc__back { color: var(--mute); text-underline-offset: .25em; display: inline-flex; min-height: 44px; align-items: center; }
+  .mc__t { margin: .6rem 0 0; font-family: var(--display); font-variation-settings: 'wdth' 125; font-weight: 900; font-size: clamp(2.4rem, 1rem + 5vw, 5rem); line-height: .9; letter-spacing: -0.035em; overflow-wrap: anywhere; }
+  .mc__p { color: var(--mute); font-size: var(--step-1); line-height: 1.35; margin: 1.2rem 0 2rem; }
+  .mc__form label { font-weight: 700; display: block; margin-bottom: .5rem; }
+  .mc__row { display: flex; gap: .6rem; }
+  .mc__row input { flex: 1; min-width: 0; min-height: 52px; padding: 0 1.1rem; border-radius: 999px; background: var(--panel); border: 1px solid var(--line); color: #fff; font: inherit; }
+  .mc__row input:focus { outline: none; border-color: var(--led-ink); box-shadow: 0 0 0 3px var(--led-soft); }
+  .mc__status { margin: 1rem 0 0; font-weight: 600; color: var(--led-ink); }
+  .mc__status:empty { display: none; }
+  .mc__help { margin-top: 2.4rem; color: var(--mute); }
+  .mc__help a { color: var(--led-ink); }
+  @media (max-width: 560px) { .mc__row { flex-direction: column; } }
+</style>
+<script>
+  const f = document.querySelector<HTMLFormElement>('[data-recuperar]')!;
+  const st = f.querySelector<HTMLElement>('[role=status]')!;
+  const b = f.querySelector<HTMLButtonElement>('button')!;
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    b.disabled = true; b.textContent = 'Enviando…'; st.textContent = '';
+    try {
+      const r = await (await fetch(f.action, { method: 'POST', body: new FormData(f) })).json();
+      st.textContent = r.ok ? 'Si ese mail tiene compras, en unos minutos te llegan los links.' : r.error;
+    } catch { st.textContent = 'No se pudo enviar. Probá de nuevo.'; }
+    finally { b.disabled = false; b.textContent = 'Reenviar links'; }
+  });
+</script>

@@ -1,0 +1,142 @@
+---
+import Base from '../../layouts/Base.astro';
+import { sql } from '../../lib/db';
+import { kits, ars, intereses } from '../../data/site';
+
+export const prerender = false;
+const nombreKit = (slug: string) => { const k = kits.find((x) => x.slug === slug); return k ? `${k.nombre} Vol. ${Number(k.vol)}` : slug; };
+const fecha = (d: string | null) => d ? new Intl.DateTimeFormat('es-AR', { dateStyle: 'short', timeStyle: 'short', timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date(d)) : '';
+const interes = (id: string) => intereses.find((i) => i.id === id)?.label ?? id;
+
+let datos: any = null;
+if (sql) {
+  const [resumen, pedidos, consultas, demos, subs, cupones, arr] = await Promise.all([
+    sql`select count(*) filter (where estado='pagado')::int as ventas, coalesce(sum(monto) filter (where estado='pagado'),0)::float as total,
+               count(*) filter (where estado='pendiente')::int as pendientes from pedidos`,
+    sql`select * from pedidos order by creado_en desc limit 50`,
+    sql`select * from consultas order by creado_en desc limit 50`,
+    sql`select * from demos order by creado_en desc limit 50`,
+    sql`select origen, count(*)::int as n from suscriptores group by origen order by n desc`,
+    sql`select * from cupones order by creado_en desc`,
+    sql`select * from arrepentimientos order by creado_en desc limit 20`,
+  ]);
+  datos = { resumen: resumen[0], pedidos, consultas, demos, subs, cupones, arr };
+}
+const msg = Astro.url.searchParams.get('msg');
+---
+<Base title="Panel · Blito Producciones" description="Panel de administración." noindex>
+  <section class="sec ad">
+    <div class="wrap">
+      <h1 class="ad__t">Panel</h1>
+      {msg && <p class="ad__msg" role="status">{msg}</p>}
+      {!datos ? <p>Falta configurar la base de datos (DATABASE_URL).</p> : (
+        <>
+          <dl class="ad__kpis">
+            <div><dt>Ventas</dt><dd>{datos.resumen.ventas}</dd></div>
+            <div><dt>Facturado</dt><dd>{ars(datos.resumen.total)}</dd></div>
+            <div><dt>Pagos pendientes</dt><dd>{datos.resumen.pendientes}</dd></div>
+            <div><dt>Consultas</dt><dd>{datos.consultas.length}</dd></div>
+            <div><dt>Demos</dt><dd>{datos.demos.length}</dd></div>
+          </dl>
+          <nav class="ad__nav" aria-label="Secciones del panel">
+            <a href="#pedidos">Pedidos</a><a href="#consultas">Consultas</a><a href="#demos">Demos</a><a href="#cupones">Cupones</a><a href="#suscriptores">Suscriptores</a><a href="#arrepentimientos">Arrepentimientos</a>
+          </nav>
+
+          <h2 id="pedidos" class="ad__h">Pedidos</h2>
+          <div class="ad__scroll"><table class="ad__table">
+            <thead><tr><th>Fecha</th><th>Kit</th><th>Mail</th><th>Total</th><th>Cupón</th><th>Estado</th><th>Descargas</th></tr></thead>
+            <tbody>{datos.pedidos.map((p: any) => <tr><td>{fecha(p.creado_en)}</td><td>{nombreKit(p.kit_slug)}</td><td>{p.email}</td><td>{ars(Number(p.monto))}</td><td>{p.cupon ?? ''}</td><td><span class={`ad__st ad__st--${p.estado}`}>{p.estado}</span></td><td>{p.descargas}</td></tr>)}</tbody>
+          </table></div>
+
+          <h2 id="consultas" class="ad__h">Consultas de producción</h2>
+          <div class="ad__cards">
+            {datos.consultas.length === 0 && <p class="ad__empty">Todavía no hay consultas.</p>}
+            {datos.consultas.map((c: any) => (
+              <article class="ad__card">
+                <header><strong>{c.nombre}</strong> <span>{interes(c.interes)}</span> <time>{fecha(c.creado_en)}</time></header>
+                <p>{c.idea}</p>
+                <footer>
+                  <a href={`mailto:${c.email}`}>{c.email}</a>
+                  {c.instagram && <a href={`https://instagram.com/${c.instagram.replace('@', '')}`} target="_blank" rel="noopener">{c.instagram}</a>}
+                  {c.whatsapp && <a href={`https://wa.me/${c.whatsapp.replace(/\D/g, '').replace(/^(?!54)/, '549')}`} target="_blank" rel="noopener">WhatsApp</a>}
+                  {c.referencias && <span>Ref: {c.referencias}</span>}
+                </footer>
+              </article>
+            ))}
+          </div>
+
+          <h2 id="demos" class="ad__h">Demos</h2>
+          <div class="ad__scroll"><table class="ad__table">
+            <thead><tr><th>Fecha</th><th>Artista</th><th>Contacto</th><th>Tema</th><th>Mensaje</th></tr></thead>
+            <tbody>{datos.demos.map((d: any) => <tr><td>{fecha(d.creado_en)}</td><td>{d.nombre}</td><td>{d.contacto}</td><td><a href={d.link} target="_blank" rel="noopener noreferrer">Escuchar</a></td><td>{d.mensaje ?? ''}</td></tr>)}</tbody>
+          </table></div>
+
+          <h2 id="cupones" class="ad__h">Cupones</h2>
+          <form class="ad__form" method="post" action="/admin/cupones">
+            <input type="hidden" name="accion" value="crear" />
+            <label>Código<input name="codigo" required pattern="[A-Za-z0-9_-]{3,40}" autocomplete="off" spellcheck="false" /></label>
+            <label>% de descuento<input name="porcentaje" type="number" min="1" max="100" required /></label>
+            <label>Usos máximos<input name="max_usos" type="number" min="1" placeholder="Sin límite" /></label>
+            <label>Vence<input name="vence" type="date" /></label>
+            <label>Solo para el kit
+              <select name="kit"><option value="">Todos los kits</option>{kits.map((k) => <option value={k.slug}>{nombreKit(k.slug)}</option>)}</select>
+            </label>
+            <button class="btn" type="submit">Crear cupón</button>
+          </form>
+          <div class="ad__scroll"><table class="ad__table">
+            <thead><tr><th>Código</th><th>%</th><th>Usos</th><th>Vence</th><th>Kits</th><th>Estado</th><th></th></tr></thead>
+            <tbody>{datos.cupones.map((c: any) => (
+              <tr><td><strong>{c.codigo}</strong></td><td>{c.porcentaje}%</td><td>{c.usos}{c.max_usos ? ` / ${c.max_usos}` : ''}</td><td>{c.vence ? fecha(c.vence) : '—'}</td><td>{c.kits?.map(nombreKit).join(', ') ?? 'Todos'}</td><td>{c.activo ? 'Activo' : 'Pausado'}</td>
+                <td><form method="post" action="/admin/cupones"><input type="hidden" name="accion" value="alternar" /><input type="hidden" name="codigo" value={c.codigo} /><button class="ad__link" type="submit">{c.activo ? 'Pausar' : 'Activar'}</button></form></td></tr>
+            ))}</tbody>
+          </table></div>
+
+          <h2 id="suscriptores" class="ad__h">Suscriptores</h2>
+          <ul class="ad__subs">{datos.subs.map((s: any) => <li><span>{s.origen.startsWith('kit:') ? `Aviso: ${nombreKit(s.origen.slice(4))}` : 'Newsletter'}</span><strong>{s.n}</strong></li>)}</ul>
+
+          <h2 id="arrepentimientos" class="ad__h">Arrepentimientos</h2>
+          <div class="ad__scroll"><table class="ad__table">
+            <thead><tr><th>Código</th><th>Fecha</th><th>Nombre</th><th>Mail</th><th>Pedido</th><th>Motivo</th></tr></thead>
+            <tbody>{datos.arr.map((a: any) => <tr><td>{a.codigo}</td><td>{fecha(a.creado_en)}</td><td>{a.nombre}</td><td>{a.email}</td><td>{a.pedido ?? ''}</td><td>{a.motivo ?? ''}</td></tr>)}</tbody>
+          </table></div>
+        </>
+      )}
+    </div>
+  </section>
+</Base>
+<style>
+  .ad { padding-top: 120px; }
+  .ad__t { margin: 0 0 1.4rem; font-family: var(--display); font-variation-settings: 'wdth' 125; font-weight: 900; font-size: var(--step-3); line-height: .9; }
+  .ad__msg { padding: .8rem 1rem; border-radius: 12px; background: var(--led-soft); color: #fff; font-weight: 600; }
+  .ad__kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: .8rem; margin: 0 0 1.6rem; }
+  .ad__kpis div { padding: 1rem 1.2rem; border-radius: 14px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .ad__kpis dt { color: var(--mute); font-size: var(--step--1); }
+  .ad__kpis dd { margin: .2rem 0 0; font-family: var(--display); font-variation-settings: 'wdth' 112; font-weight: 900; font-size: var(--step-2); font-variant-numeric: tabular-nums; }
+  .ad__nav { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; }
+  .ad__nav a { color: var(--led-ink); padding-block: .5rem; }
+  .ad__h { margin: 3rem 0 1rem; font-family: var(--display); font-variation-settings: 'wdth' 112; font-size: var(--step-1); }
+  .ad__scroll { overflow-x: auto; }
+  .ad__table { width: 100%; border-collapse: collapse; font-size: var(--step--1); }
+  .ad__table th, .ad__table td { text-align: left; padding: .6rem .7rem; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  .ad__table td:last-child { white-space: normal; }
+  .ad__table th { color: var(--mute); font-weight: 600; }
+  .ad__table a { color: var(--led-ink); }
+  .ad__st { padding: .1rem .5rem; border-radius: 999px; background: rgba(255,255,255,.08); }
+  .ad__st--pagado { background: rgba(108,240,162,.15); color: #6cf0a2; }
+  .ad__st--rechazado { background: rgba(255,90,80,.15); color: #ff8a82; }
+  .ad__cards { display: grid; gap: .8rem; }
+  .ad__card { padding: 1rem 1.2rem; border-radius: 14px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); }
+  .ad__card header { display: flex; flex-wrap: wrap; gap: .4rem 1rem; align-items: baseline; }
+  .ad__card header span { color: var(--led-ink); font-weight: 600; }
+  .ad__card time { color: var(--mute); font-size: var(--step--1); margin-left: auto; }
+  .ad__card p { white-space: pre-line; color: #d4d6ea; }
+  .ad__card footer { display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-size: var(--step--1); }
+  .ad__card footer a { color: var(--led-ink); }
+  .ad__empty { color: var(--mute); }
+  .ad__form { display: flex; flex-wrap: wrap; gap: .8rem; align-items: end; margin-bottom: 1rem; }
+  .ad__form label { display: grid; gap: .3rem; font-size: var(--step--1); font-weight: 600; }
+  .ad__form input, .ad__form select { min-height: 44px; padding: 0 .8rem; border-radius: 10px; background: #000; border: 1px solid var(--line); color: #fff; font: inherit; color-scheme: dark; }
+  .ad__link { background: none; border: 0; color: var(--led-ink); font: inherit; font-weight: 600; cursor: pointer; text-decoration: underline; min-height: 32px; }
+  .ad__subs { list-style: none; padding: 0; margin: 0; display: grid; gap: .4rem; max-width: 480px; }
+  .ad__subs li { display: flex; justify-content: space-between; padding: .5rem 0; border-bottom: 1px solid var(--line); }
+</style>

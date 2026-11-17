@@ -1,27 +1,38 @@
 #!/usr/bin/env bash
-# Prepara el video de portada para web: sin audio, arranque inmediato, liviano y sin escalar por encima del original.
+# Video de portada en máxima calidad para web, sin audio y con arranque inmediato.
 # Uso: scripts/encode-hero.sh video.mp4 [inicio_seg] [duracion_seg] [segundo_del_poster]
-# Salida en public/video/: hero.webm (VP9/AV1), hero.mp4 (H.264), hero-mobile.mp4 (H.264 liviano), hero-poster.jpg
+#
+# Genera en public/video/:
+#   hero-1080.webm / hero-1080.mp4  pantallas grandes (>=1280px). Si el original es 720p se reescala con
+#                                   lanczos + limpieza leve de compresión + enfoque suave: se ve más nítido
+#                                   que dejar que el navegador estire un 720p.
+#   hero-720.webm  / hero-720.mp4   notebooks y tablets.
+#   hero-mobile.mp4                 celulares (540p, liviano).
+#   hero-poster.jpg                 primer cuadro visible mientras carga.
+# Cuadros por segundo: los del original, sin interpolar (interpolar genera artefactos en cortes rápidos).
 set -euo pipefail
 IN="${1:?Pasá el video original}"; SS="${2:-0}"; DUR="${3:-12}"; POSTER_AT="${4:-2}"
 OUT="$(dirname "$0")/../public/video"; mkdir -p "$OUT"
+FPS=$(ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of csv=p=0 "$IN")
 SRC_H=$(ffprobe -v error -select_streams v:0 -show_entries stream=height -of csv=p=0 "$IN")
-H=$(( SRC_H < 1080 ? SRC_H : 1080 )); W=$(( H * 16 / 9 ))
-MH=$(( H < 540 ? H : 540 )); MW=$(( MH * 16 / 9 ))
-vf() { echo "scale=$1:$2:force_original_aspect_ratio=increase:flags=lanczos,crop=$1:$2,fps=25,format=yuv420p"; }
 COMMON=(-hide_banner -loglevel error -y -ss "$SS" -t "$DUR" -i "$IN" -an -map_metadata -1)
-
-# H.264 (Safari/iOS y todo lo demás). faststart: empieza a reproducir antes de bajar todo.
-ffmpeg "${COMMON[@]}" -vf "$(vf $W $H)" -c:v libx264 -preset veryslow -crf 21 -maxrate 4M -bufsize 8M -profile:v high -g 50 -movflags +faststart "$OUT/hero.mp4"
-ffmpeg "${COMMON[@]}" -vf "$(vf $MW $MH)" -c:v libx264 -preset veryslow -crf 24 -maxrate 1.5M -bufsize 3M -profile:v main -g 50 -movflags +faststart "$OUT/hero-mobile.mp4"
-# WebM para Chrome/Firefox/Edge: AV1 si está disponible, si no VP9 en dos pasadas.
-if ffmpeg -hide_banner -encoders 2>/dev/null | grep -q libsvtav1; then
-  ffmpeg "${COMMON[@]}" -vf "$(vf $W $H)" -c:v libsvtav1 -preset 4 -crf 32 -g 50 "$OUT/hero.webm"
-else
-  ffmpeg "${COMMON[@]}" -vf "$(vf $W $H)" -c:v libvpx-vp9 -b:v 0 -crf 31 -row-mt 1 -deadline good -cpu-used 1 -g 50 -pass 1 -f null /dev/null
-  ffmpeg "${COMMON[@]}" -vf "$(vf $W $H)" -c:v libvpx-vp9 -b:v 0 -crf 31 -row-mt 1 -deadline good -cpu-used 1 -g 50 -pass 2 "$OUT/hero.webm"
-  rm -f ffmpeg2pass-0.log
-fi
-# Poster: un cuadro representativo (no el primero, que suele ser negro).
-ffmpeg -hide_banner -loglevel error -y -ss "$(echo "$SS + $POSTER_AT" | bc)" -i "$IN" -frames:v 1 -update 1 -vf "$(vf $W $H)" -q:v 3 "$OUT/hero-poster.jpg"
+CLEAN="hqdn3d=1.2:1.2:2.5:2.5"   # saca el ruido de bloques del original sin lavar la imagen
+vf() { # ancho alto [enfoque]
+  local f="$CLEAN,scale=$1:$2:force_original_aspect_ratio=increase:flags=lanczos+accurate_rnd+full_chroma_int,crop=$1:$2"
+  [ "${3:-}" = "sharp" ] && f="$f,unsharp=5:5:0.55:5:5:0"
+  echo "$f,fps=$FPS,format=yuv420p"
+}
+x264() { ffmpeg "${COMMON[@]}" -vf "$1" -c:v libx264 -preset veryslow -tune film -crf "$2" -maxrate "$3" -bufsize "$4" -profile:v high -pix_fmt yuv420p -g 50 -movflags +faststart "$5"; }
+vp9() {
+  ffmpeg "${COMMON[@]}" -vf "$1" -c:v libvpx-vp9 -b:v 0 -crf "$2" -row-mt 1 -tile-columns 2 -deadline good -cpu-used 0 -auto-alt-ref 1 -lag-in-frames 25 -g 50 -pass 1 -passlogfile "$OUT/.vp9" -f null /dev/null
+  ffmpeg "${COMMON[@]}" -vf "$1" -c:v libvpx-vp9 -b:v 0 -crf "$2" -row-mt 1 -tile-columns 2 -deadline good -cpu-used 0 -auto-alt-ref 1 -lag-in-frames 25 -g 50 -pass 2 -passlogfile "$OUT/.vp9" "$3"
+  rm -f "$OUT"/.vp9*
+}
+SHARP=$([ "$SRC_H" -lt 1080 ] && echo sharp || echo "")
+x264 "$(vf 1920 1080 $SHARP)" 18 9M 18M "$OUT/hero-1080.mp4"
+vp9  "$(vf 1920 1080 $SHARP)" 24 "$OUT/hero-1080.webm"
+x264 "$(vf 1280 720)" 19 5M 10M "$OUT/hero-720.mp4"
+vp9  "$(vf 1280 720)" 26 "$OUT/hero-720.webm"
+x264 "$(vf 960 540)" 22 2M 4M "$OUT/hero-mobile.mp4"
+ffmpeg -hide_banner -loglevel error -y -ss "$(echo "$SS + $POSTER_AT" | bc)" -i "$IN" -frames:v 1 -update 1 -vf "$(vf 1920 1080 $SHARP)" -q:v 2 "$OUT/hero-poster.jpg"
 ls -lh "$OUT"/hero*

@@ -2,8 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import { getPedido, procesarPago } from '../../lib/pedidos';
 import { linkDescarga } from '../../lib/tokens';
-import { kits } from '../../data/site';
-import { contacto } from '../../data/site';
+import { kits, contacto, ars } from '../../data/site';
 
 export const prerender = false;
 Astro.response.headers.set('Cache-Control', 'no-store');
@@ -20,6 +19,7 @@ if (!pedido) Astro.response.status = 404;
 const kit = pedido ? kits.find((k) => k.slug === pedido!.kit_slug) : undefined;
 const nombre = kit ? `${kit.nombre} Vol. ${Number(kit.vol)}` : '';
 const vencido = Astro.url.searchParams.has('vencido');
+const fecha = (d: string | null) => d ? new Intl.DateTimeFormat('es-AR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'America/Argentina/Buenos_Aires' }).format(new Date(d)) : '';
 ---
 <Base title={pedido ? `Tu compra: ${nombre}` : 'Compra no encontrada'} description="Estado de tu compra en Blito Producciones." noindex>
   <section class="sec cp">
@@ -37,7 +37,15 @@ const vencido = Astro.url.searchParams.has('vencido');
           <h1 class="cp__t">{nombre} es tuyo</h1>
           <p class="cp__p">{vencido ? 'Tu link anterior se venció. Acá tenés uno nuevo, válido por 7 días.' : `También te lo mandamos a ${pedido.email}. El link dura 7 días.`}</p>
           <a class="btn btn--big" href={linkDescarga(pedido.id)} rel="nofollow">Descargar kit (.zip)</a>
-          <p class="cp__meta">Pedido {pedido.id}</p>
+          <dl class="cp__recibo">
+            <div><dt>Kit</dt><dd translate="no">{nombre}</dd></div>
+            {pedido.cupon && pedido.precio_lista && <div><dt>Precio</dt><dd>{ars(Number(pedido.precio_lista))}</dd></div>}
+            {pedido.cupon && <div><dt>Descuento</dt><dd>Código {pedido.cupon}</dd></div>}
+            <div><dt>Total pagado</dt><dd>{ars(Number(pedido.monto))}</dd></div>
+            <div><dt>Fecha</dt><dd>{fecha(pedido.pagado_en)}</dd></div>
+            <div><dt>Pedido</dt><dd class="cp__id">{pedido.id}</dd></div>
+          </dl>
+          <p class="cp__meta">Guardá esta página: desde acá podés volver a descargar cuando quieras. También podés <a href="/kits/mis-compras">recuperar tus compras</a> con tu mail.</p>
         </>
       )}
       {pedido?.estado === 'pendiente' && (
@@ -67,8 +75,15 @@ const vencido = Astro.url.searchParams.has('vencido');
   .cp__state::before { content: ''; width: .6rem; height: .6rem; border-radius: 50%; background: currentColor; }
   .cp__state--ok { color: #6cf0a2; }
   .cp__state--bad { color: #ff8a82; }
-  .cp__t { margin: 0; font-size: clamp(2.4rem, 1.2rem + 4.5vw, 5rem); line-height: .9; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.035em; }
+  .cp__t { margin: 0; font-size: clamp(2.4rem, 1.2rem + 4.5vw, 5rem); line-height: .9; font-weight: 900; font-family: var(--display); font-variation-settings: 'wdth' 125; letter-spacing: -0.035em; }
   .cp__p { margin: 1.2rem 0 2rem; font-size: var(--step-1); line-height: 1.35; color: var(--mute); max-width: 40ch; }
   .btn--big { min-height: 60px; padding-inline: 2rem; font-size: var(--step-1); }
-  .cp__meta { margin-top: 2rem; font-size: var(--step--1); color: var(--mute); font-variant-numeric: tabular-nums; }
+  .cp__meta { margin-top: 1.6rem; font-size: var(--step--1); color: var(--mute); }
+  .cp__meta a { color: var(--led-ink); }
+  .cp__recibo { margin: 2.4rem 0 0; padding: 1.2rem 1.4rem; border-radius: 16px; background: var(--panel); box-shadow: inset 0 0 0 1px var(--line); display: grid; gap: .1rem; }
+  .cp__recibo div { display: flex; justify-content: space-between; gap: 1rem; padding: .55rem 0; border-bottom: 1px solid var(--line); }
+  .cp__recibo div:last-child { border-bottom: 0; }
+  .cp__recibo dt { color: var(--mute); }
+  .cp__recibo dd { margin: 0; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+  .cp__id { font-size: var(--step--1); font-weight: 500 !important; overflow-wrap: anywhere; }
 </style>

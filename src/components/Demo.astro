@@ -1,16 +1,16 @@
 ---
-import { contacto } from '../data/site';
+import { contacto, waLink } from '../data/site';
 ---
 <section id="demo" class="sec demo" aria-labelledby="demo-t">
   <div class="wrap demo__grid">
     <div>
-      <h2 id="demo-t" class="demo__title">Mandá tu demo</h2>
-      <p class="demo__lead">Escuchamos todo lo que llega. Si nos copa, te escribimos por donde nos digas.</p>
+      <h2 id="demo-t" class="demo__title">Mandá tu demo al sello</h2>
+      <p class="demo__lead">¿Tenés un tema terminado y buscás sello? Mandalo. Escuchamos todo lo que llega y, si nos copa, te escribimos.</p><p class="demo__alt">Si lo que buscás es producir un tema, <a href="/produccion#contacto">contanos tu idea acá</a>.</p>
       <div class="direct">
         <p>O escribinos directo</p>
-        <a href={contacto.whatsappUrl}>WhatsApp {contacto.whatsapp}</a>
-        <a href={contacto.igSello}>Instagram @blitoproducciones</a>
-        <a href={contacto.igBlito}>Instagram @blitormx</a>
+        <a href={waLink("Hola Blito, te quiero mandar un tema.")} target="_blank" rel="noopener">WhatsApp {contacto.whatsapp}</a>
+        <a href={contacto.igSello} target="_blank" rel="noopener">Instagram @blitoproducciones</a>
+        <a href={contacto.igBlito} target="_blank" rel="noopener">Instagram @blitormx</a>
       </div>
     </div>
 
@@ -45,12 +45,13 @@ import { contacto } from '../data/site';
 <style>
   .demo { border-top: 1px solid var(--line); }
   .demo__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); }
-  .demo__title { margin: 0; font-size: clamp(3.2rem, 1rem + 7vw, 8rem); line-height: .86; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.04em; max-width: 8ch; }
+  .demo__title { margin: 0; font-size: clamp(3.2rem, 1rem + 7vw, 8rem); line-height: .86; font-weight: 900; font-family: var(--display); font-variation-settings: 'wdth' 125; letter-spacing: -0.04em; max-width: 8ch; }
   .demo__lead { font-size: var(--step-1); line-height: 1.3; max-width: 28ch; margin: 1.5rem 0 0; color: var(--mute); }
+  .demo__alt { margin: 1rem 0 0; color: var(--mute); }
+  .demo__alt a { color: var(--led-ink); }
   .direct { margin-top: 2.5rem; display: grid; gap: .2rem; justify-items: start; }
   .direct p { margin: 0 0 .4rem; font-weight: 700; color: var(--led-ink); }
   .direct a { font-weight: 500; text-underline-offset: .25em; padding-block: .35rem; }
-  .hp { position: absolute; left: -9999px; }
   @media (max-width: 860px) { .demo__grid { grid-template-columns: 1fr; } }
 </style>
 

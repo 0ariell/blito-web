@@ -41,3 +41,30 @@ create table if not exists arrepentimientos (
   motivo     text,
   creado_en  timestamptz not null default now()
 );
+
+-- Consultas de producción y mensualidad.
+create table if not exists consultas (
+  id          bigint generated always as identity primary key,
+  nombre      text not null,
+  instagram   text,
+  email       text not null,
+  whatsapp    text,
+  interes     text not null,
+  idea        text not null,
+  referencias text,
+  estado      text not null default 'nueva',
+  creado_en   timestamptz not null default now()
+);
+
+-- Códigos de descuento para kits.
+create table if not exists cupones (
+  codigo     text primary key,            -- en mayúsculas
+  porcentaje int not null check (porcentaje between 1 and 100),
+  activo     boolean not null default true,
+  usos       int not null default 0,
+  max_usos   int,                         -- null = sin límite
+  vence      timestamptz,                 -- null = no vence
+  kits       text[],                      -- null = todos los kits
+  creado_en  timestamptz not null default now()
+);
+alter table pedidos add column if not exists cupon text, add column if not exists precio_lista numeric(12,2), add column if not exists nombre text;

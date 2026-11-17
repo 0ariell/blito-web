@@ -1,0 +1,35 @@
+---
+import KitCover from './KitCover.astro';
+import { totalSonidos, ars } from '../data/site';
+import type { Kit } from '../data/site';
+interface Props { kit: Kit; nuevo?: boolean }
+const { kit, nuevo = false } = Astro.props;
+const nombre = `${kit.nombre} Vol. ${Number(kit.vol)}`;
+---
+<a href={`/kits/${kit.slug}`} class="kcard" data-generos={kit.generos.join('|').toLowerCase()}>
+  <span class="kcard__cover">
+    <KitCover kit={kit} />
+    {nuevo && <span class="kcard__badge">Nuevo</span>}
+    {kit.estado === 'proximamente' && <span class="kcard__badge kcard__badge--soon">Próximamente</span>}
+  </span>
+  <span class="kcard__row">
+    <span class="kcard__name" translate="no">{nombre}</span>
+    <span class="kcard__price">{kit.estado === 'venta' ? ars(kit.precioArs) : 'Avisame'}</span>
+  </span>
+  <span class="kcard__meta">{kit.generos.join(', ')} · {totalSonidos(kit)} sonidos</span>
+</a>
+
+<style>
+  .kcard { display: grid; grid-template-columns: minmax(0, 1fr); gap: .7rem; text-decoration: none; }
+  .kcard__cover { position: relative; display: block; }
+  .kcard__cover :global(.kc) { transition: transform .45s var(--ease), box-shadow .3s; }
+  .kcard:hover .kcard__cover :global(.kc), .kcard:focus-visible .kcard__cover :global(.kc) {
+    transform: translateY(-6px); box-shadow: inset 0 0 0 1px var(--led-ink), 0 30px 60px -30px rgba(43,48,242,.8);
+  }
+  .kcard__badge { position: absolute; top: .8rem; right: .8rem; padding: .25rem .7rem; border-radius: 999px; background: var(--led); color: #fff; font-size: var(--step--1); font-weight: 700; }
+  .kcard__badge--soon { background: rgba(255,255,255,.12); backdrop-filter: blur(8px); }
+  .kcard__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem 1rem; }
+  .kcard__name { font-family: var(--display); font-variation-settings: 'wdth' 112; font-weight: 800; font-size: var(--step-1); line-height: 1.1; }
+  .kcard__price { color: var(--led-ink); font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .kcard__meta { color: var(--mute); font-size: var(--step--1); margin-top: -.3rem; }
+</style>

@@ -76,14 +76,24 @@ para precargar la próxima página y transiciones nativas entre páginas.
 
 Todo el texto editable está en `src/data/site.ts`. Las imágenes van en `src/assets/img/`.
 
-### Video de portada
+### Tipografía
 
-```bash
-scripts/encode-hero.sh ruta/al/video.mov [segundo_inicio] [duracion]
-```
+Anybody (títulos y marca, eje de ancho 50–150) y Mona Sans (texto), servidas desde el propio sitio.
 
-Genera WebM 1080p (AV1 o VP9), MP4 1080p y 720p (H.264) y el poster en `public/video/`.
-Después: `hero.activo = true` en `src/data/site.ts`.
+### Video
+
+`scripts/encode-hero.sh` deja un video listo para web (WebM + MP4 en 1080p/720p/mobile y poster) por si
+se vuelve a usar uno en la portada. Hoy la portada es una foto recortada (`src/assets/img/blito-hero.png`).
+
+## Páginas de negocio
+
+- `/produccion`: servicios, mensualidad con acompañamiento y formulario de consulta (tabla `consultas`, aviso por mail).
+- `/kits`: catálogo con filtro por género. `/kits/<slug>`: ficha con compra, cupón, licencia y FAQ.
+- `/kits/mis-compras`: reenvía los links de descarga al mail del comprador.
+- `/admin`: panel con ventas, pedidos, consultas, demos, suscriptores, arrepentimientos y cupones.
+  Protegido con usuario y contraseña (`ADMIN_USER`, por defecto `blito`, y `ADMIN_PASSWORD`). Sin contraseña configurada, no existe.
+
+Los textos de servicios, mensualidad, licencia y preguntas están en `src/data/site.ts`.
 
 ## Puesta en marcha de la tienda
 
@@ -91,3 +101,4 @@ Después: `hero.activo = true` en `src/data/site.ts`.
 2. Subir el .zip de cada kit a un almacenamiento privado y cargar las URLs en `KIT_ARCHIVOS`.
 3. Resend: verificar el dominio, cargar `RESEND_API_KEY` y `MAIL_FROM`.
 4. Completar `LEGAL_TITULAR`, `LEGAL_CUIT` y `LEGAL_EMAIL` para los términos.
+5. Cargar `ADMIN_PASSWORD` para entrar al panel y crear cupones.
