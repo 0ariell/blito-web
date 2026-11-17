@@ -3,15 +3,19 @@ import { Image } from 'astro:assets';
 import { servicios } from '../data/site';
 import { img } from '../lib/img';
 const fotos = [
-  { f: 'estudio-rojo.jpg', alt: 'El escritorio del estudio con luz roja: notebook con FL Studio, interfaz de audio y monitores.', w: [480, 800, 1200] },
-  { f: 'ig-7.jpg', alt: 'El estudio con paneles acústicos y monitores.', w: [192] },
-  { f: 'ig-6.jpg', alt: 'Blito frente a la consola del estudio, con luces azules.', w: [192] },
+  { f: 'estudio-azul.jpg', alt: 'Blito de espaldas produciendo en FL Studio, en el estudio con luz azul.' },
+  { f: 'estudio-rojo.jpg', alt: 'El escritorio del estudio con luz roja: notebook, interfaz de audio y monitores.' },
+  { f: 'sesion-pantalla-verde.jpg', alt: 'Blito junto a un DJ en una sesión grabada frente a pantalla verde.' },
+  { f: 'estudio-verde.jpg', alt: 'Sesión de producción en un estudio con paneles acústicos verde agua.' },
+  { f: 'estudio-sala.jpg', alt: 'Sesión de grabación en una sala con artistas y productor frente a la computadora.' },
 ];
 ---
 <section id="estudio" class="sec st" aria-labelledby="st-t">
   <div class="wrap st__grid">
     <div class="st__photos">
-      {fotos.map((p, i) => <Image src={img(p.f)} alt={p.alt} widths={p.w} sizes={i === 0 ? '(min-width: 900px) 40vw, 100vw' : '(min-width: 900px) 20vw, 45vw'} loading="lazy" />)}
+      {fotos.map((p, i) => (
+        <Image src={img(p.f)} alt={p.alt} widths={i === 0 ? [480, 800, 900] : [320, 480]} sizes={i === 0 ? '(min-width: 900px) 42vw, 100vw' : '(min-width: 900px) 20vw, 45vw'} loading="lazy" />
+      ))}
     </div>
     <div>
       <h2 id="st-t" class="sec-title">El estudio</h2>
@@ -26,10 +30,9 @@ const fotos = [
 
 <style>
   .st__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
-  .st__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 560px; }
+  .st__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 600px; }
   .st__photos img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; }
-  .st__photos img:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 3; }
-  .st__photos img:nth-child(3) { transform: translateY(1.5rem); }
+  .st__photos img:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 5; object-position: 50% 60%; }
   .svc { margin: 2rem 0 0; }
   .st__cta { margin-top: 2rem; }
   .svc > div { padding: 1.3rem 0; border-top: 1px solid var(--line); }
