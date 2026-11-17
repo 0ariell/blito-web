@@ -1,0 +1,67 @@
+---
+interface Props { title: string; description: string }
+const { title, description } = Astro.props;
+---
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content="/img/blito-night.jpg" />
+    <meta name="theme-color" content="#2b30f2" />
+    <link rel="icon" href="/img/logo-bp.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,300..900;1,62..125,300..900&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    /* Sacados de las fotos del estudio: las tiras LED azules, la pared blanca, la mesa roja. */
+    --led: #2b30f2;
+    --led-deep: #1a1db0;
+    --wall: #eef0f7;
+    --chrome: #b9bfd3;
+    --black: #000;
+    --rec: #ff3b2f;
+    --ink-on-led: #fff;
+
+    --gutter: clamp(16px, 4vw, 56px);
+    --max: 1440px;
+    --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.875rem);
+    --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+    --step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+    --step-2: clamp(1.6rem, 1.3rem + 1.4vw, 2.6rem);
+    --step-3: clamp(2.4rem, 1.6rem + 3.6vw, 5rem);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 80px; -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--led);
+    color: var(--ink-on-led);
+    font-family: 'Archivo', system-ui, sans-serif;
+    font-size: var(--step-0);
+    font-variation-settings: 'wdth' 100;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  img { display: block; max-width: 100%; height: auto; }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--rec); outline-offset: 3px; }
+  .wrap { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: var(--gutter); }
+  .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>

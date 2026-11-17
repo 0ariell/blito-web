@@ -1,0 +1,522 @@
+---
+import Base from '../layouts/Base.astro';
+import { creditos, artistas, servicios, contacto } from '../data/site';
+const ultimo = creditos[0];
+---
+<Base
+  title="Blito Producciones"
+  description="Productora y sello de Buenos Aires. Beats, grabación, mezcla y lanzamientos para artistas de trap y RKT."
+>
+  <header class="top">
+    <div class="wrap top__in">
+      <a href="#inicio" class="top__logo" aria-label="Blito Producciones, inicio">
+        <img src="/img/logo-bp.png" width="44" height="44" alt="" />
+        <span>Blito Producciones</span>
+      </a>
+      <nav aria-label="Secciones">
+        <a href="#creditos">Créditos</a>
+        <a href="#artistas">Artistas</a>
+        <a href="#estudio">Estudio</a>
+      </nav>
+      <a href="#demo" class="btn btn--small">Mandá tu demo</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section id="inicio" class="hero">
+      <div class="wrap">
+        <h1 class="hero__mark" aria-label="Blito Producciones">
+          <span class="hero__letters" aria-hidden="true">
+            <span style="--i:0">B</span><span style="--i:1">L</span><span style="--i:2">I</span><span style="--i:3">T</span><span style="--i:4">O</span>
+          </span>
+        </h1>
+        <div class="hero__grid">
+          <div class="hero__copy">
+            <p class="hero__lead">
+              Productora y sello de Buenos Aires. Hacemos el beat, grabamos, mezclamos y sacamos el tema.
+            </p>
+            <div class="hero__actions">
+              <a href="#demo" class="btn btn--light">Mandá tu demo</a>
+              <a href="#creditos" class="link">Escuchar lo último</a>
+            </div>
+            <a class="nowplaying" href="#creditos" data-open={ultimo.youtube}>
+              <span class="rec" aria-hidden="true"></span>
+              <span>
+                <strong>{ultimo.tema}</strong><br />
+                {ultimo.artista}
+              </span>
+            </a>
+          </div>
+          <figure class="hero__photo">
+            <img src="/img/blito-night.jpg" width="785" height="869" alt="Blito de noche, con gorro gris y buzo negro, frente a un auto." fetchpriority="high" />
+            <figcaption>Blito, productor y fundador</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRÉDITOS -->
+    <section id="creditos" class="credits" aria-labelledby="creditos-t">
+      <div class="wrap">
+        <div class="sechead">
+          <h2 id="creditos-t">Créditos</h2>
+          <p>Temas que salieron del estudio. Tocá uno para verlo acá mismo.</p>
+        </div>
+
+        <div class="ctable" role="table" aria-label="Créditos de producción">
+          <div class="ctable__head" role="row">
+            <span role="columnheader">Tema</span>
+            <span role="columnheader">Artista</span>
+            <span role="columnheader">Blito</span>
+            <span role="columnheader">Año</span>
+            <span role="columnheader"><span class="visually-hidden">Video</span></span>
+          </div>
+          {creditos.map((c) => (
+            <div class="crow" role="rowgroup" data-id={c.youtube}>
+              <button
+                class="crow__btn"
+                role="row"
+                aria-expanded="false"
+                aria-controls={`player-${c.youtube}`}
+                data-thumb={`/img/yt-${c.youtube}.jpg`}
+              >
+                <span role="cell" class="crow__tema">{c.tema}</span>
+                <span role="cell" class="crow__artista">{c.artista}</span>
+                <span role="cell" class="crow__rol">{c.rol}</span>
+                <span role="cell" class="crow__anio">{c.anio}</span>
+                <span role="cell" class="crow__play"><span class="crow__playlabel">Ver video</span></span>
+              </button>
+              <div class="crow__player" id={`player-${c.youtube}`} hidden>
+                <div class="crow__frame" data-src={`https://www.youtube-nocookie.com/embed/${c.youtube}?autoplay=1&rel=0`} data-title={`${c.tema} de ${c.artista}`}></div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p class="credits__more">
+          ¿Querés el catálogo completo? <a href={contacto.igSello}>Seguilo en @blitoproducciones</a>
+        </p>
+      </div>
+      <img class="peek" src={`/img/yt-${creditos[0].youtube}.jpg`} alt="" aria-hidden="true" width="320" height="180" />
+    </section>
+
+    <!-- ARTISTAS -->
+    <section id="artistas" class="artists" aria-labelledby="artistas-t">
+      <div class="wrap artists__grid">
+        <div>
+          <div class="sechead sechead--dark">
+            <h2 id="artistas-t">Con quién trabajamos</h2>
+            <p>Artistas que pasaron por el estudio o salieron por el sello.</p>
+          </div>
+          <ul class="names">
+            {artistas.map((a, i) => (
+              <li>
+                <a href={a.url} data-photo={a.foto} class:list={[{ 'is-on': i === 0 }]} target="_blank" rel="noopener">
+                  <img src={a.foto} alt="" width="96" height="96" loading="lazy" />
+                  <span>{a.nombre}</span>
+                </a>
+              </li>
+            ))}
+            <li class="names__next"><a href="#demo"><span>¿Vos?</span></a></li>
+          </ul>
+        </div>
+        <figure class="artists__photo" aria-hidden="true">
+          <img src={artistas[0].foto} alt="" width="1280" height="720" loading="lazy" />
+        </figure>
+      </div>
+    </section>
+
+    <!-- ESTUDIO -->
+    <section id="estudio" class="studio" aria-labelledby="estudio-t">
+      <div class="wrap studio__grid">
+        <div class="studio__photos">
+          <img src="/img/ig-6.jpg" alt="Blito sentado frente a la consola del estudio, con luces azules." width="192" height="232" loading="lazy" />
+          <img src="/img/ig-7.jpg" alt="El estudio con paneles acústicos y monitores." width="192" height="231" loading="lazy" />
+          <img src="/img/ig-2.jpg" alt="Dos artistas posando en el estudio." width="192" height="232" loading="lazy" />
+          <img src="/img/ig-4.jpg" alt="Blito en las bandejas, con luz roja." width="192" height="232" loading="lazy" />
+        </div>
+        <div>
+          <div class="sechead">
+            <h2 id="estudio-t">El estudio</h2>
+            <p>Todo lo que necesita un tema para salir, en un mismo lugar.</p>
+          </div>
+          <dl class="services">
+            {servicios.map((s) => (
+              <div>
+                <dt>{s.titulo}</dt>
+                <dd>{s.texto}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <!-- DEMO -->
+    <section id="demo" class="demo" aria-labelledby="demo-t">
+      <div class="wrap demo__grid">
+        <div>
+          <h2 id="demo-t" class="demo__title">Mandá tu demo</h2>
+          <p class="demo__lead">Escuchamos todo lo que llega. Si nos copa, te escribimos por donde nos digas.</p>
+          <div class="direct">
+            <p>O escribinos directo</p>
+            <a href={contacto.whatsappUrl}>WhatsApp {contacto.whatsapp}</a>
+            <a href={contacto.igSello}>Instagram @blitoproducciones</a>
+            <a href={contacto.igBlito}>Instagram @blitormx</a>
+          </div>
+        </div>
+
+        <form class="form" method="post" action="/api/demo" novalidate>
+          <div class="field">
+            <label for="f-nombre">Nombre o nombre artístico</label>
+            <input id="f-nombre" name="nombre" autocomplete="name" required />
+            <p class="field__err" id="e-nombre" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="f-contacto">Instagram, mail o WhatsApp</label>
+            <input id="f-contacto" name="contacto" required placeholder="@tuusuario" />
+            <p class="field__err" id="e-contacto" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="f-link">Link al tema</label>
+            <input id="f-link" name="link" type="url" inputmode="url" required placeholder="https://drive.google.com/…" />
+            <p class="field__hint">Drive, SoundCloud o YouTube oculto. Que se pueda escuchar sin pedir acceso.</p>
+            <p class="field__err" id="e-link" aria-live="polite"></p>
+          </div>
+          <div class="field">
+            <label for="f-mensaje">Contanos algo <span class="opt">(opcional)</span></label>
+            <textarea id="f-mensaje" name="mensaje" rows="4" placeholder="Qué buscás: beat, mezcla, sacar el tema por el sello…"></textarea>
+          </div>
+          <div class="hp" aria-hidden="true"><label>Web <input name="web" tabindex="-1" autocomplete="off" /></label></div>
+          <button class="btn" type="submit">Enviar demo</button>
+          <p class="form__status" role="status" aria-live="polite"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <div class="wrap foot__in">
+      <p class="foot__mark" aria-hidden="true">BLITO</p>
+      <div class="foot__row">
+        <p>© 2026 Blito Producciones. Buenos Aires.</p>
+        <nav aria-label="Redes">
+          <a href={contacto.igSello}>Instagram</a>
+          <a href={contacto.taplink}>Taplink</a>
+          <a href={contacto.whatsappUrl}>WhatsApp</a>
+        </nav>
+      </div>
+    </div>
+  </footer>
+</Base>
+
+<style>
+  /* ---------- Botones y links ---------- */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 48px; padding: 0 1.4em;
+    background: var(--led); color: #fff;
+    font: inherit; font-weight: 700; font-variation-settings: 'wdth' 112;
+    text-decoration: none; border: 0; border-radius: 999px; cursor: pointer;
+    transition: background-color .15s, color .15s;
+  }
+  .btn:hover { background: var(--led-deep); }
+  .btn--light { background: #fff; color: var(--led); }
+  .btn--light:hover { background: var(--wall); }
+  .btn--small { min-height: 40px; font-size: var(--step--1); background: #fff; color: var(--led); }
+  .btn--small:hover { background: var(--wall); }
+  .link { font-weight: 600; text-underline-offset: .25em; text-decoration-thickness: 2px; }
+
+  /* ---------- Header ---------- */
+  .top { position: sticky; top: 0; z-index: 20; background: var(--led); }
+  .top__in { display: flex; align-items: center; gap: 1.5rem; min-height: 72px; }
+  .top__logo { display: flex; align-items: center; gap: .7rem; text-decoration: none; font-weight: 700; font-variation-settings: 'wdth' 112; }
+  .top__logo img { border-radius: 50%; }
+  .top nav { display: flex; gap: 1.6rem; margin-left: auto; }
+  .top nav a { text-decoration: none; font-weight: 500; }
+  .top nav a:hover { text-decoration: underline; text-underline-offset: .3em; }
+  @media (max-width: 760px) {
+    .top nav, .top__logo span { display: none; }
+    .top .btn { margin-left: auto; }
+  }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-bottom: clamp(3rem, 8vw, 7rem); }
+  .hero__mark {
+    margin: clamp(.5rem, 2vw, 1.5rem) 0 0;
+    font-size: clamp(4.5rem, 24.2vw, 22rem);
+    line-height: .78;
+    font-weight: 900;
+    font-variation-settings: 'wdth' 125;
+    letter-spacing: -0.045em;
+    margin-inline: -0.04em;
+  }
+  .hero__letters { display: flex; justify-content: space-between; padding-top: .06em; clip-path: inset(-1em -1em 0 -1em); }
+  .hero__letters span { display: block; animation: rise .9s cubic-bezier(.2,.7,.1,1) both; animation-delay: calc(var(--i) * 70ms); }
+  @keyframes rise { from { transform: translateY(105%); } to { transform: none; } }
+
+  .hero__grid {
+    display: grid; grid-template-columns: 1fr minmax(0, 40%); gap: clamp(1.5rem, 4vw, 4rem);
+    margin-top: clamp(-4rem, -6vw, -1rem);
+    align-items: end;
+  }
+  .hero__copy { align-self: start; padding-top: clamp(3rem, 8vw, 7.5rem); }
+  .hero__lead {
+    max-width: 22ch; margin: 0;
+    font-size: var(--step-2); line-height: 1.12; font-weight: 600;
+    font-variation-settings: 'wdth' 88; letter-spacing: -0.01em;
+  }
+  .hero__actions { display: flex; flex-wrap: wrap; align-items: center; gap: 1.5rem; margin-top: 2rem; }
+  .nowplaying {
+    display: inline-flex; gap: .9rem; align-items: flex-start; margin-top: 3rem;
+    padding-top: 1rem; border-top: 2px solid rgba(255,255,255,.35);
+    text-decoration: none; font-size: var(--step--1); line-height: 1.4; max-width: 34ch;
+  }
+  .nowplaying strong { font-size: var(--step-0); }
+  .nowplaying:hover strong { text-decoration: underline; text-underline-offset: .25em; }
+  .rec { width: .7rem; height: .7rem; border-radius: 50%; background: var(--rec); margin-top: .35rem; flex: none; box-shadow: 0 0 0 4px rgba(255,59,47,.25); }
+
+  .hero__photo { margin: 0; position: relative; z-index: 2; }
+  .hero__photo img { width: 100%; aspect-ratio: 785 / 869; object-fit: cover; }
+  .hero__photo figcaption { font-size: var(--step--1); margin-top: .6rem; opacity: .8; }
+
+  @media (max-width: 760px) {
+    .hero__grid { grid-template-columns: 1fr; margin-top: 1.5rem; }
+    .hero__copy { padding-top: 0; }
+    .hero__photo { order: -1; }
+  }
+
+  /* ---------- Encabezados de sección ---------- */
+  .sechead { margin-bottom: clamp(2rem, 4vw, 3.5rem); }
+  .sechead h2 {
+    margin: 0; font-size: var(--step-3); line-height: .9; font-weight: 900;
+    font-variation-settings: 'wdth' 125; letter-spacing: -0.035em;
+  }
+  .sechead p { margin: .9rem 0 0; max-width: 46ch; font-size: var(--step-0); opacity: .85; }
+
+  /* ---------- Créditos ---------- */
+  .credits { background: var(--wall); color: var(--led); padding-block: clamp(4rem, 9vw, 8rem); position: relative; }
+  .ctable { border-top: 3px solid var(--led); }
+  .ctable__head, .crow__btn {
+    display: grid; grid-template-columns: minmax(0, 2.4fr) minmax(0, 1.4fr) minmax(0, 1.1fr) 4rem 8rem;
+    gap: 1.25rem; align-items: baseline;
+  }
+  .ctable__head { padding: .8rem 0; font-size: var(--step--1); font-weight: 600; border-bottom: 1px solid rgba(43,48,242,.3); }
+  .crow { border-bottom: 1px solid rgba(43,48,242,.3); }
+  .crow__btn {
+    width: 100%; padding: 1.4rem 0; background: none; border: 0; color: inherit; font: inherit;
+    text-align: left; cursor: pointer;
+  }
+  .crow__tema {
+    font-size: var(--step-2); line-height: 1; font-weight: 800;
+    font-variation-settings: 'wdth' 70; letter-spacing: -0.01em;
+  }
+  .crow__artista { font-weight: 600; }
+  .crow__anio { font-variant-numeric: tabular-nums; }
+  .crow__play { justify-self: end; }
+  .crow__playlabel {
+    display: inline-flex; align-items: center; gap: .5rem; padding: .45rem .9rem;
+    border: 2px solid currentColor; border-radius: 999px; font-size: var(--step--1); font-weight: 700;
+  }
+  .crow__playlabel::before { content: ''; width: 0; height: 0; border-left: .55em solid currentColor; border-block: .35em solid transparent; }
+  .crow__btn:hover .crow__playlabel, .crow__btn[aria-expanded='true'] .crow__playlabel { background: var(--led); color: #fff; border-color: var(--led); }
+  .crow__btn[aria-expanded='true'] .crow__playlabel::before { border: 0; width: .55em; height: .7em; border-inline: .18em solid currentColor; }
+  .crow__player { padding-bottom: 1.6rem; }
+  .crow__frame { aspect-ratio: 16 / 9; background: #000; max-width: 960px; }
+  .crow__frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .credits__more { margin: 2rem 0 0; font-weight: 500; }
+
+  .peek {
+    position: fixed; left: 0; top: 0; width: 280px; height: auto; aspect-ratio: 16/9; object-fit: cover;
+    pointer-events: none; z-index: 30; opacity: 0; transition: opacity .15s;
+    box-shadow: 0 18px 40px rgba(26,29,176,.35);
+  }
+  .peek.is-on { opacity: 1; }
+  @media (hover: none), (max-width: 760px) { .peek { display: none; } }
+
+  @media (max-width: 760px) {
+    .ctable__head { display: none; }
+    .crow__btn { grid-template-columns: 1fr auto; gap: .35rem 1rem; }
+    .crow__tema { grid-column: 1 / -1; }
+    .crow__artista { grid-column: 1; }
+    .crow__rol { grid-column: 1; font-size: var(--step--1); }
+    .crow__anio { grid-column: 2; grid-row: 2; justify-self: end; }
+    .crow__play { grid-column: 2; grid-row: 3; }
+  }
+
+  /* ---------- Artistas ---------- */
+  .artists { background: var(--black); color: #fff; padding-block: clamp(4rem, 9vw, 8rem); }
+  .artists__grid { display: grid; grid-template-columns: 1fr minmax(0, 46%); gap: clamp(2rem, 5vw, 5rem); align-items: center; }
+  .sechead--dark p { color: var(--chrome); opacity: 1; }
+  .names { list-style: none; margin: 0; padding: 0; }
+  .names a {
+    display: flex; align-items: center; gap: 1rem; text-decoration: none;
+    font-size: clamp(3rem, 1.5rem + 6vw, 7.5rem); line-height: .95; font-weight: 900;
+    font-variation-settings: 'wdth' 62; letter-spacing: -0.02em; text-transform: uppercase;
+    color: #3a3d55; transition: color .2s;
+  }
+  .names a img { display: none; width: 64px; height: 64px; object-fit: cover; border-radius: 50%; }
+  .names a:hover, .names a:focus-visible, .names a.is-on { color: #fff; }
+  .names__next a { color: transparent; -webkit-text-stroke: 2px var(--led); }
+  .names__next a:hover, .names__next a:focus-visible { color: var(--led); -webkit-text-stroke: 0; }
+  .artists__photo { margin: 0; }
+  .artists__photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+  @media (max-width: 860px) {
+    .artists__grid { grid-template-columns: 1fr; }
+    .artists__photo { display: none; }
+    .names a { color: #fff; }
+    .names a img { display: block; }
+    .names li + li { margin-top: .6rem; }
+  }
+
+  /* ---------- Estudio ---------- */
+  .studio { padding-block: clamp(4rem, 9vw, 8rem); }
+  .studio__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .studio__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 520px; }
+  .studio__photos img { width: 100%; height: 100%; object-fit: cover; aspect-ratio: 4 / 5; }
+    .services { margin: 0; display: grid; gap: 0; }
+  .services > div { padding: 1.4rem 0; border-top: 2px solid rgba(255,255,255,.35); }
+  .services dt { font-size: var(--step-1); font-weight: 800; font-variation-settings: 'wdth' 100; }
+  .services dd { margin: .4rem 0 0; max-width: 48ch; opacity: .9; }
+  @media (max-width: 860px) { .studio__grid { grid-template-columns: 1fr; } }
+
+  /* ---------- Demo ---------- */
+  .demo { background: var(--wall); color: var(--led); padding-block: clamp(4rem, 9vw, 8rem); }
+  .demo__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); }
+  .demo__title {
+    margin: 0; font-size: clamp(3.2rem, 1rem + 7vw, 8rem); line-height: .86; font-weight: 900;
+    font-variation-settings: 'wdth' 125; letter-spacing: -0.04em; max-width: 8ch;
+  }
+  .demo__lead { font-size: var(--step-1); line-height: 1.3; max-width: 28ch; margin: 1.5rem 0 0; font-weight: 500; }
+  .direct { margin-top: 2.5rem; display: grid; gap: .4rem; justify-items: start; }
+  .direct p { margin: 0 0 .3rem; font-weight: 700; }
+  .direct a { font-weight: 500; text-underline-offset: .25em; }
+
+  .form { display: grid; gap: 1.4rem; align-content: start; }
+  .field { display: grid; gap: .4rem; }
+  .field label { font-weight: 700; }
+  .opt { font-weight: 400; opacity: .7; }
+  .field input, .field textarea {
+    width: 100%; font: inherit; color: #0b0d3a; background: #fff;
+    border: 2px solid rgba(43,48,242,.35); border-radius: 10px; padding: .8rem .9rem; min-height: 48px;
+  }
+  .field input::placeholder, .field textarea::placeholder { color: #7a7fa6; }
+  .field input:focus, .field textarea:focus { outline: none; border-color: var(--led); box-shadow: 0 0 0 3px rgba(43,48,242,.25); }
+  .field input[aria-invalid='true'] { border-color: #c4170c; }
+  .field__hint { margin: 0; font-size: var(--step--1); color: #4a4fa0; }
+  .field__err { margin: 0; font-size: var(--step--1); color: #c4170c; font-weight: 600; min-height: 0; }
+  .field__err:empty { display: none; }
+  .form .btn { justify-self: start; }
+  .form__status { margin: 0; font-weight: 700; }
+  .form__status:empty { display: none; }
+  .hp { position: absolute; left: -9999px; }
+  @media (max-width: 860px) { .demo__grid { grid-template-columns: 1fr; } }
+
+  /* ---------- Footer ---------- */
+  .foot { background: var(--led-deep); padding-top: 3rem; overflow: hidden; }
+  .foot__mark {
+    margin: 0; font-size: clamp(4.5rem, 24.2vw, 22rem); line-height: .78; font-weight: 900;
+    font-variation-settings: 'wdth' 125; letter-spacing: -0.045em; color: var(--led);
+    margin-inline: -0.04em;
+  }
+  .foot__row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; padding-block: 1.5rem 2rem; font-size: var(--step--1); }
+  .foot__row p { margin: 0; }
+  .foot__row nav { display: flex; gap: 1.4rem; }
+</style>
+
+<script>
+  // ----- Créditos: abrir el video en la misma fila -----
+  const rows = document.querySelectorAll<HTMLButtonElement>('.crow__btn');
+  function toggle(btn: HTMLButtonElement, force?: boolean) {
+    const panel = document.getElementById(btn.getAttribute('aria-controls')!)!;
+    const open = force ?? btn.getAttribute('aria-expanded') !== 'true';
+    rows.forEach((b) => {
+      if (b !== btn && b.getAttribute('aria-expanded') === 'true') toggle(b, false);
+    });
+    btn.setAttribute('aria-expanded', String(open));
+    btn.querySelector('.crow__playlabel')!.lastChild!.textContent = open ? 'Cerrar' : 'Ver video';
+    panel.hidden = !open;
+    const frame = panel.querySelector<HTMLElement>('.crow__frame')!;
+    if (open) {
+      const f = document.createElement('iframe');
+      f.src = frame.dataset.src!;
+      f.title = frame.dataset.title!;
+      f.allow = 'autoplay; encrypted-media; picture-in-picture';
+      f.allowFullscreen = true;
+      frame.replaceChildren(f);
+    } else {
+      frame.replaceChildren();
+    }
+  }
+  rows.forEach((btn) => btn.addEventListener('click', () => toggle(btn)));
+
+  document.querySelector<HTMLAnchorElement>('.nowplaying')?.addEventListener('click', (e) => {
+    const id = (e.currentTarget as HTMLElement).dataset.open;
+    const btn = document.querySelector<HTMLButtonElement>(`.crow[data-id="${id}"] .crow__btn`);
+    if (btn && btn.getAttribute('aria-expanded') !== 'true') toggle(btn, true);
+  });
+
+  // ----- Créditos: miniatura que sigue al cursor (solo mouse) -----
+  const peek = document.querySelector<HTMLImageElement>('.peek')!;
+  if (matchMedia('(hover: hover) and (min-width: 761px)').matches) {
+    rows.forEach((btn) => {
+      btn.addEventListener('pointerenter', () => {
+        if (btn.getAttribute('aria-expanded') === 'true') return;
+        peek.src = btn.dataset.thumb!;
+        peek.classList.add('is-on');
+      });
+      btn.addEventListener('pointerleave', () => peek.classList.remove('is-on'));
+      btn.addEventListener('click', () => peek.classList.remove('is-on'));
+      btn.addEventListener('pointermove', (e) => {
+        peek.style.transform = `translate(${e.clientX + 24}px, ${e.clientY - 80}px)`;
+      });
+    });
+  }
+
+  // ----- Artistas: la foto cambia con el nombre -----
+  const photo = document.querySelector<HTMLImageElement>('.artists__photo img');
+  document.querySelectorAll<HTMLAnchorElement>('.names a[data-photo]').forEach((a, _, all) => {
+    const on = () => {
+      all.forEach((x) => x.classList.toggle('is-on', x === a));
+      if (photo) photo.src = a.dataset.photo!;
+    };
+    a.addEventListener('pointerenter', on);
+    a.addEventListener('focus', on);
+  });
+
+  // ----- Formulario de demo -----
+  const form = document.querySelector<HTMLFormElement>('.form')!;
+  const status = form.querySelector<HTMLElement>('.form__status')!;
+  const submit = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    form.querySelectorAll('.field__err').forEach((el) => (el.textContent = ''));
+    form.querySelectorAll('[aria-invalid]').forEach((el) => el.removeAttribute('aria-invalid'));
+    status.textContent = '';
+    submit.disabled = true;
+    submit.textContent = 'Enviando…';
+    try {
+      const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+      const data = await res.json();
+      if (data.ok) {
+        form.reset();
+        status.textContent = 'Demo enviada. Si nos copa, te escribimos.';
+      } else {
+        let first: HTMLElement | null = null;
+        for (const [k, msg] of Object.entries<string>(data.errors ?? {})) {
+          document.getElementById(`e-${k}`)!.textContent = msg;
+          const input = document.getElementById(`f-${k}`)!;
+          input.setAttribute('aria-invalid', 'true');
+          input.setAttribute('aria-describedby', `e-${k}`);
+          first ??= input;
+        }
+        first?.focus();
+      }
+    } catch {
+      status.textContent = 'No se pudo enviar. Revisá tu conexión y probá de nuevo, o escribinos por WhatsApp.';
+    } finally {
+      submit.disabled = false;
+      submit.textContent = 'Enviar demo';
+    }
+  });
+</script>

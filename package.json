@@ -1,0 +1,17 @@
+{
+  "name": "blito-producciones",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "start": "node ./dist/server/entry.mjs",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/node": "^9.5.5",
+    "@neondatabase/serverless": "^1.2.1",
+    "astro": "^5.18.2"
+  }
+}

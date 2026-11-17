@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: blito-producciones
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: DATABASE_URL
+        sync: false
