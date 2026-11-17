@@ -38,6 +38,8 @@ export default defineConfig({
         "base-uri 'self'",
         "object-src 'none'",
       ],
+      // La API del reproductor de YouTube (se carga recién cuando alguien toca play).
+      scriptDirective: { resources: ["'self'", 'https://www.youtube.com'] },
     },
   },
 });

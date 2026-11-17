@@ -2,16 +2,19 @@
 import { Image } from 'astro:assets';
 import { contacto } from '../data/site';
 import { img } from '../lib/img';
+interface Props { titulo?: 'h1' | 'h2' }
+const { titulo = 'h2' } = Astro.props;
+const Titulo = titulo;
 ---
-<section id="blito" class="sec ab" aria-labelledby="ab-t">
+<section id="blito" class="sec ab ab--page" aria-labelledby="ab-t">
   <div class="wrap ab__grid">
     <figure class="ab__main">
       <Image src={img('blito-emotions.jpg')} alt="Blito con buzo negro Emotions Never Die, en un pasillo iluminado de azul." widths={[480, 800, 939]} sizes="(min-width: 900px) 42vw, 100vw" loading="lazy" />
     </figure>
     <div class="ab__body">
-      <h2 id="ab-t" class="sec-title" translate="no">Blito</h2>
+      <Titulo id="ab-t" class="sec-title" translate="no">Blito</Titulo>
       <p class="ab__lead">Productor musical y fundador del sello. Hace los beats en el estudio y acompaña cada tema desde la primera idea hasta que sale.</p>
-      <p class="ab__p">Trabaja RKT, trap y turreo, produce para artistas de la escena y saca sus propios remixes y turreo edits.</p>
+      <p class="ab__p">RKT, trap y turreo: produce para artistas de la escena y saca sus propios remixes y turreo edits.</p>
       <div class="ab__links">
         <a class="btn btn--ghost" href={contacto.igBlito} target="_blank" rel="noopener">Instagram de Blito</a>
         <a class="btn btn--ghost" href={contacto.youtube} target="_blank" rel="noopener">Canal de YouTube</a>

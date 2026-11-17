@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const paginas = ['/', '/produccion', '/kits', '/kits/cabina-vol-1', '/kits/clande-vol-1', '/kits/mis-compras', '/legales/terminos', '/legales/privacidad', '/arrepentimiento'];
+const paginas = ['/', '/lanzamientos', '/blito', '/demo', '/produccion', '/kits', '/kits/cabina-vol-1', '/kits/clande-vol-1', '/kits/mis-compras', '/legales/terminos', '/legales/privacidad', '/arrepentimiento'];
 
 for (const path of paginas) {
   test(`${path} carga sin errores ni CSP rota ni scroll horizontal`, async ({ page }) => {
@@ -31,21 +31,23 @@ test('404 real para rutas que no existen', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 })).toContainText('no está en el catálogo');
 });
 
-test('el reproductor abre y cierra devolviendo el foco', async ({ page, isMobile }) => {
+test('el reproductor propio abre con portada y controles, y cierra devolviendo el foco', async ({ page, isMobile }) => {
   await page.goto('/');
   const card = page.locator('.card__btn').first();
   await card.click();
   const dlg = page.locator('dialog[data-player]');
   await expect(dlg).toBeVisible();
-  await expect(dlg.locator('iframe')).toHaveAttribute('src', /youtube-nocookie\.com\/embed\//);
+  await expect(dlg.locator('[data-poster]')).toHaveAttribute('src', /_astro|_image/);
+  await expect(dlg.getByRole('slider', { name: 'Posición del video' })).toBeVisible();
+  // El iframe de YouTube no recibe el mouse: los controles son los de la web
+  await expect(dlg.locator('.pl__frame')).toHaveCSS('pointer-events', 'none');
   await page.keyboard.press('Escape');
   await expect(dlg).toBeHidden();
-  await expect(dlg.locator('iframe')).toHaveCount(0);
   if (!isMobile) await expect(card).toBeFocused();
 });
 
 test('filtros de lanzamientos', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('/lanzamientos');
   await page.getByRole('button', { name: 'Producciones' }).click();
   await expect(page.getByRole('button', { name: 'Producciones' })).toHaveAttribute('aria-pressed', 'true');
   const visibles = page.locator('.card:not([hidden])');
@@ -63,7 +65,7 @@ test('menú mobile', async ({ page, isMobile }) => {
 });
 
 test('validación del formulario de demo', async ({ page }) => {
-  await page.goto('/#demo');
+  await page.goto('/demo');
   await page.getByLabel('Nombre o nombre artístico').fill('Test');
   await page.getByLabel('Instagram, mail o WhatsApp').fill('@test');
   await page.getByLabel('Link al tema').fill('no-es-un-link');
@@ -108,7 +110,7 @@ test('un link de descarga adulterado no sirve', async ({ request }) => {
 
 test('galería detrás de escena: se desplaza con los botones', async ({ page, isMobile }) => {
   test.skip(isMobile, 'en mobile se desliza con el dedo');
-  await page.goto('/#backstage');
+  await page.goto('/blito#backstage');
   const track = page.locator('#gal-track');
   await expect(page.getByRole('button', { name: 'Fotos anteriores' })).toBeDisabled();
   await page.getByRole('button', { name: 'Fotos siguientes' }).click();
@@ -166,4 +168,13 @@ test('panel: pide contraseña y entra con la correcta', async ({ request, browse
   expect((await p.goto('/admin'))?.status()).toBe(200);
   await expect(p.getByRole('heading', { name: 'Panel' })).toBeVisible();
   await ctx.close();
+});
+
+test('volver arriba aparece al bajar y sube', async ({ page }) => {
+  await page.goto('/produccion');
+  const btn = page.getByRole('link', { name: 'Volver arriba' });
+  await page.mouse.wheel(0, 3000);
+  await expect(btn).toHaveClass(/is-on/);
+  await btn.click();
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeLessThan(10);
 });

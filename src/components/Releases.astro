@@ -1,7 +1,13 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { lanzamientos, contacto } from '../data/site';
 import { img } from '../lib/img';
+interface Props { limite?: number; titulo?: 'h1' | 'h2' }
+const { limite, titulo = 'h2' } = Astro.props;
+const Titulo = titulo;
+const lista = limite ? lanzamientos.slice(0, limite) : lanzamientos;
+// Portada grande para el reproductor (se muestra mientras carga, en pausa y al terminar).
+const posters = await Promise.all(lista.map((l) => getImage({ src: img(l.img), width: 1280, format: 'webp' })));
 const filtros = [
   { id: 'todo', label: 'Todo' },
   { id: 'produccion', label: 'Producciones' },
@@ -12,18 +18,23 @@ const filtros = [
   <div class="wrap">
     <div class="sec-head">
       <div>
-        <h2 id="rel-t" class="sec-title">Lanzamientos</h2>
-        <p class="sec-lead">Lo que salió del estudio. Tocá una portada para escucharlo acá.</p>
+        <Titulo id="rel-t" class:list={['sec-title', { 'page-title': titulo === 'h1' }]}>{limite ? 'Lo último' : 'Lanzamientos'}</Titulo>
+        <p class="sec-lead">Tocá una portada para verlo acá.</p>
       </div>
-      <div class="chips" role="group" aria-label="Filtrar lanzamientos">
-        {filtros.map((f, i) => (
-          <button class="chip" data-filter={f.id} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label}</button>
-        ))}
-      </div>
+      {limite ? (
+        <a class="btn btn--ghost" href="/lanzamientos">Ver todos los lanzamientos</a>
+      ) : (
+        <div class="chips" role="group" aria-label="Filtrar lanzamientos">
+          {filtros.map((f, i) => (
+            <button class="chip" data-filter={f.id} aria-pressed={i === 0 ? 'true' : 'false'}>{f.label}</button>
+          ))}
+        </div>
+      )}
     </div>
 
     <ul class="grid" role="list">
-      {lanzamientos.map((l, i) => {
+      {lista.map((l, i) => {
+        const poster = posters[i].src;
         const square = l.img.startsWith('cover-');
         return (
           <li class:list={['card', { 'card--lead': i === 0 }]} data-tipo={l.tipo}>
@@ -31,7 +42,9 @@ const filtros = [
               class="card__btn"
               data-play={l.youtube}
               data-spotify={l.spotify}
-              data-title={`${l.tema}, ${l.artistas}`}
+              data-title={l.tema}
+              data-artist={l.artistas}
+              data-thumb={poster}
             >
               <span class="card__media">
                 <Image
@@ -56,10 +69,17 @@ const filtros = [
         );
       })}
       <li class="card card--more" data-tipo="todo">
-        <a href={contacto.youtube} class="more" target="_blank" rel="noopener">
-          <span class="more__t">Más videos en YouTube</span>
-          <span class="more__s">Remixes, turreo edits y sesiones del estudio.</span>
-        </a>
+        {limite ? (
+          <a href="/lanzamientos" class="more">
+            <span class="more__t">Todos los lanzamientos</span>
+            <span class="more__s">{lanzamientos.length} temas: producciones, remixes y turreo edits.</span>
+          </a>
+        ) : (
+          <a href={contacto.youtube} class="more" target="_blank" rel="noopener">
+            <span class="more__t">Más en YouTube</span>
+            <span class="more__s">Remixes, turreo edits y sesiones del estudio.</span>
+          </a>
+        )}
       </li>
     </ul>
   </div>

@@ -3,13 +3,8 @@ import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import Releases from '../components/Releases.astro';
 import KitsSection from '../components/KitsSection.astro';
-import Artists from '../components/Artists.astro';
-import Studio from '../components/Studio.astro';
-import Demo from '../components/Demo.astro';
 import Player from '../components/Player.astro';
-import About from '../components/About.astro';
-import Gallery from '../components/Gallery.astro';
-import { getImage } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { img } from '../lib/img';
 // Preload de la figura del hero (LCP) para que el navegador la pida antes de leer el CSS.
 const heroImg = await getImage({ src: img('blito-hero.png'), widths: [480, 760, 1007], format: 'webp', quality: 86 });
@@ -21,12 +16,67 @@ const heroImg = await getImage({ src: img('blito-hero.png'), widths: [480, 760, 
   <link slot="head" rel="preload" as="image" type="image/webp" fetchpriority="high"
     imagesrcset={heroImg.srcSet.attribute} imagesizes="(min-width: 900px) 52vw, 96vw" />
   <Hero />
-  <Releases />
-  <About />
-  <KitsSection />
-  <Artists />
-  <Gallery />
-  <Studio />
-  <Demo />
+  <Releases limite={4} />
+
+  <section class="sec tz" aria-labelledby="tz-prod">
+    <div class="wrap">
+      <a class="tz__prod" href="/produccion">
+        <span class="tz__bg" aria-hidden="true"><Image src={img('estudio-azul.jpg')} alt="" widths={[640, 1200]} sizes="100vw" loading="lazy" /></span>
+        <span class="tz__body">
+          <h2 id="tz-prod" class="tz__t">Producí con Blito</h2>
+          <span class="tz__p">Beats a medida, producción completa, mezcla y master, y una mensualidad con acompañamiento personalizado.</span>
+          <span class="btn btn--white tz__cta">Ver producción</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <KitsSection compacto />
+
+  <section class="sec tz tz--last" aria-labelledby="tz-blito">
+    <div class="wrap tz__grid">
+      <a class="tz__card" href="/blito">
+        <Image src={img('blito-emotions.jpg')} alt="" widths={[480, 800]} sizes="(min-width: 900px) 45vw, 100vw" loading="lazy" />
+        <span class="tz__cap">
+          <h2 id="tz-blito" class="tz__h">Blito y el estudio</h2>
+          <span>Quién es, dónde se hacen los temas y lo que pasa detrás de escena.</span>
+        </span>
+      </a>
+      <a class="tz__card" href="/demo">
+        <Image src={img('bts-cabina.jpg')} alt="" widths={[480, 800]} sizes="(min-width: 900px) 45vw, 100vw" loading="lazy" />
+        <span class="tz__cap">
+          <h2 class="tz__h">Mandá tu demo</h2>
+          <span>¿Tenés un tema terminado y buscás sello? Mandalo y lo escuchamos.</span>
+        </span>
+      </a>
+    </div>
+  </section>
+
   <Player />
 </Base>
+
+<style>
+  .tz { padding-block: clamp(2.5rem, 5vw, 4rem); }
+  .tz--last { padding-bottom: clamp(4.5rem, 9vw, 8rem); }
+  .tz__prod { position: relative; display: block; min-height: clamp(340px, 42vw, 520px); border-radius: 24px; overflow: hidden; isolation: isolate; text-decoration: none; box-shadow: inset 0 0 0 1px var(--line); }
+  .tz__bg { position: absolute; inset: 0; z-index: -1; }
+  .tz__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; transition: transform .8s var(--ease); }
+  .tz__bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(0,0,0,.88) 30%, rgba(0,0,0,.2)); }
+  .tz__prod:hover .tz__bg img { transform: scale(1.03); }
+  .tz__body { position: absolute; left: 0; bottom: 0; display: grid; gap: 1rem; justify-items: start; padding: clamp(1.5rem, 4vw, 3.5rem); max-width: 640px; }
+  .tz__t { margin: 0; font-family: var(--display); font-variation-settings: 'wdth' 125; font-weight: 900; font-size: clamp(2.4rem, 1.2rem + 4.4vw, 5.6rem); line-height: .88; letter-spacing: -0.04em; }
+  .tz__p { color: #d4d6ea; font-size: var(--step-1); line-height: 1.35; }
+  .tz__cta { margin-top: .4rem; }
+  .tz__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1rem, 2vw, 1.5rem); }
+  .tz__card { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: 20px; overflow: hidden; text-decoration: none; box-shadow: inset 0 0 0 1px var(--line); }
+  .tz__card img { width: 100%; height: 100%; object-fit: cover; transition: transform .8s var(--ease); }
+  .tz__card:hover img { transform: scale(1.03); }
+  .tz__card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.9) 15%, transparent 60%); }
+  .tz__cap { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; display: grid; gap: .5rem; padding: clamp(1.2rem, 3vw, 2rem); color: #d4d6ea; }
+  .tz__h { margin: 0; color: #fff; font-family: var(--display); font-variation-settings: 'wdth' 120; font-weight: 900; font-size: clamp(1.8rem, 1rem + 2.4vw, 3.2rem); line-height: .92; letter-spacing: -0.03em; }
+  @media (max-width: 760px) {
+    .tz__grid { grid-template-columns: minmax(0, 1fr); }
+    .tz__card { aspect-ratio: 4 / 4.4; }
+    .tz__bg::after { background: linear-gradient(to top, rgba(0,0,0,.92) 40%, rgba(0,0,0,.3)); }
+  }
+</style>

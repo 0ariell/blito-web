@@ -1,6 +1,5 @@
 ---
 import { Image } from 'astro:assets';
-import { servicios } from '../data/site';
 import { img } from '../lib/img';
 const fotos = [
   { f: 'estudio-azul.jpg', alt: 'Blito de espaldas produciendo en FL Studio, en el estudio con luz azul.' },
@@ -19,10 +18,7 @@ const fotos = [
     </div>
     <div>
       <h2 id="st-t" class="sec-title">El estudio</h2>
-      <p class="sec-lead">Todo lo que necesita un tema para salir, en un mismo lugar.</p>
-      <dl class="svc">
-        {servicios.map((s) => (<div><dt>{s.titulo}</dt><dd>{s.texto}</dd></div>))}
-      </dl>
+      <p class="sec-lead">Donde se graban, se producen y se mezclan los temas. Beats, voces, mezcla y master en un mismo lugar.</p>
       <div class="st__ctas"><a href="/produccion" class="btn st__cta">Ver servicios y mensualidad</a><a href="/produccion#contacto" class="btn btn--ghost st__cta">Contanos tu idea</a></div>
     </div>
   </div>

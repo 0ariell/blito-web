@@ -1,61 +1,316 @@
 ---
-// Un solo reproductor para toda la página: cualquier elemento con data-play (YouTube)
-// o data-spotify lo abre. Así no se cargan iframes hasta que alguien toca play.
+// Reproductor propio sobre la API de YouTube: controles, portada y estados de la web.
+// Lo de YouTube (título, logo, sugerencias) queda fuera del recorte del marco.
+// Un solo reproductor para toda la página: cualquier elemento con data-play (YouTube) o data-spotify lo abre.
 ---
 <dialog class="pl" data-player aria-labelledby="pl-title">
   <div class="pl__bar">
-    <p id="pl-title" class="pl__title"></p>
-    <button class="pl__close" data-player-close>
+    <div class="pl__meta">
+      <p id="pl-title" class="pl__title" translate="no"></p>
+      <p class="pl__artist"></p>
+    </div>
+    <button class="pl__icon" data-close>
       <span class="visually-hidden">Cerrar reproductor</span>
       <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
     </button>
   </div>
-  <div class="pl__frame" data-player-frame></div>
+
+  <!-- Video -->
+  <div class="pl__stage" data-stage hidden>
+    <div class="pl__frame"><div data-yt></div></div>
+    <button class="pl__hit" data-toggle tabindex="-1" aria-hidden="true"></button>
+    <div class="pl__cover" data-cover>
+      <img alt="" data-poster />
+      <span class="pl__big" data-big aria-hidden="true">
+        <svg class="i-play" viewBox="0 0 24 24" width="34" height="34"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        <svg class="i-replay" viewBox="0 0 24 24" width="34" height="34"><path d="M12 5V2L7 6l5 4V7a5 5 0 11-5 5H5a7 7 0 107-7z" fill="currentColor"/></svg>
+      </span>
+      <span class="pl__spin" aria-hidden="true"></span>
+    </div>
+    <p class="pl__error" data-error hidden>Este video no se puede reproducir acá. <a data-ext target="_blank" rel="noopener">Abrilo en YouTube</a>.</p>
+
+    <div class="pl__controls" data-controls>
+      <button class="pl__icon" data-toggle>
+        <span class="visually-hidden" data-toggle-label>Reproducir</span>
+        <svg class="i-play" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
+        <svg class="i-pause" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>
+      </button>
+      <span class="pl__time" data-cur>0:00</span>
+      <input class="pl__seek" type="range" min="0" max="1000" value="0" step="1" data-seek aria-label="Posición del video" />
+      <span class="pl__time pl__time--dur" data-dur>0:00</span>
+      <button class="pl__icon" data-mute>
+        <span class="visually-hidden" data-mute-label>Silenciar</span>
+        <svg class="i-vol" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM16 8.5a5 5 0 010 7M18.5 6a8.5 8.5 0 010 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="i-muted" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4zM16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <input class="pl__vol" type="range" min="0" max="100" value="100" data-vol aria-label="Volumen" />
+      <button class="pl__icon" data-fs>
+        <span class="visually-hidden">Pantalla completa</span>
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Audio (Spotify) -->
+  <div class="pl__audio" data-audio hidden></div>
 </dialog>
 
 <style>
   .pl {
-    width: min(1100px, calc(100vw - 2 * var(--gutter))); max-height: 92vh; padding: 0; border: 0; border-radius: 16px;
-    background: #000; color: #fff; box-shadow: 0 0 0 1px var(--line), 0 30px 120px rgba(43,48,242,.35); overflow: hidden; overscroll-behavior: contain;
+    width: min(1180px, calc(100vw - 2 * var(--gutter))); max-height: 94vh; padding: 0; border: 0; border-radius: 18px;
+    background: #000; color: #fff; overflow: hidden; overscroll-behavior: contain;
+    box-shadow: 0 0 0 1px var(--line), 0 40px 140px rgba(43,48,242,.4);
   }
-  .pl::backdrop { background: rgba(0,0,0,.8); backdrop-filter: blur(6px); }
-  .pl[open] { animation: pl-in .28s var(--ease); }
-  @keyframes pl-in { from { opacity: 0; transform: translateY(12px) scale(.98); } }
-  .pl__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem .5rem .5rem 1.2rem; }
-  .pl__title { margin: 0; font-weight: 700; font-size: var(--step--1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .pl__close { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border: 0; border-radius: 50%; background: none; cursor: pointer; }
-  .pl__close:hover { background: var(--panel); }
-  .pl__frame { aspect-ratio: 16 / 9; background: #000; }
-  .pl__frame.is-audio { aspect-ratio: auto; height: 352px; padding: 0 1rem 1rem; }
-  .pl__frame iframe { width: 100%; height: 100%; border: 0; display: block; border-radius: 8px; }
+  .pl::backdrop { background: rgba(0,0,0,.84); backdrop-filter: blur(8px); }
+  .pl[open] { animation: pl-in .3s var(--ease); }
+  @keyframes pl-in { from { opacity: 0; transform: translateY(14px) scale(.98); } }
+
+  .pl__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .6rem .6rem .6rem 1.3rem; }
+  .pl__meta { min-width: 0; }
+  .pl__title { margin: 0; font-family: var(--display); font-variation-settings: 'wdth' 112; font-weight: 800; font-size: var(--step-0); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pl__artist { margin: 0; color: var(--mute); font-size: var(--step--1); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .pl__icon { flex: none; display: grid; place-items: center; width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: #fff; cursor: pointer; transition: background-color .15s; }
+  .pl__icon:hover { background: rgba(255,255,255,.1); }
+  .pl__icon .i-pause, .pl__icon .i-muted { display: none; }
+  .pl.is-playing .pl__controls .i-play { display: none; }
+  .pl.is-playing .pl__controls .i-pause { display: block; }
+  .pl.is-muted .i-vol { display: none; }
+  .pl.is-muted .i-muted { display: block; }
+
+  /* Escenario 16:9. El iframe es 3 veces más alto y está centrado: el video ocupa la franja visible
+     y los elementos de YouTube (arriba y abajo del iframe) quedan recortados. */
+  .pl__stage { position: relative; aspect-ratio: 16 / 9; background: #000; overflow: hidden; }
+  .pl__frame { position: absolute; left: 0; right: 0; top: -100%; height: 300%; pointer-events: none; }
+  .pl__frame :global(iframe) { width: 100%; height: 100%; border: 0; display: block; }
+  .pl__hit { position: absolute; inset: 0; z-index: 1; background: transparent; border: 0; cursor: pointer; }
+
+  .pl__cover { position: absolute; inset: 0; z-index: 2; display: grid; place-items: center; transition: opacity .45s ease; pointer-events: none; }
+  .pl__cover img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pl__cover::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle, rgba(0,0,0,.15), rgba(0,0,0,.55)); }
+  .pl.is-playing .pl__cover { opacity: 0; }
+  .pl__big { position: relative; z-index: 1; display: grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; background: var(--led); color: #fff; box-shadow: 0 10px 40px rgba(43,48,242,.7); transition: transform .2s var(--ease), opacity .2s; }
+  .pl__big .i-replay { display: none; }
+  .pl.is-ended .pl__big .i-play { display: none; }
+  .pl.is-ended .pl__big .i-replay { display: block; }
+  .pl.is-loading .pl__big { opacity: 0; transform: scale(.8); }
+  .pl__spin { position: absolute; z-index: 1; width: 56px; height: 56px; border-radius: 50%; border: 3px solid rgba(255,255,255,.2); border-top-color: #fff; opacity: 0; animation: spin .8s linear infinite; }
+  .pl.is-loading .pl__spin { opacity: 1; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .pl__error { position: absolute; inset: auto 1rem 4.6rem; z-index: 4; margin: 0; padding: .8rem 1rem; border-radius: 12px; background: rgba(0,0,0,.8); }
+  .pl__error a { color: var(--led-ink); }
+
+  .pl__controls {
+    position: absolute; z-index: 3; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: .4rem;
+    padding: 2.4rem .8rem .7rem; background: linear-gradient(to top, rgba(0,0,0,.85), transparent);
+    transition: opacity .3s, transform .3s;
+  }
+  .pl.is-playing.is-idle .pl__controls { opacity: 0; transform: translateY(8px); }
+  .pl.is-playing.is-idle .pl__stage { cursor: none; }
+  .pl__time { font-size: var(--step--1); font-variant-numeric: tabular-nums; min-width: 3.2em; text-align: center; color: #d4d6ea; }
+
+  .pl__seek, .pl__vol { appearance: none; -webkit-appearance: none; height: 28px; background: transparent; cursor: pointer; }
+  .pl__seek { flex: 1; min-width: 0; --p: 0%; }
+  .pl__vol { width: 84px; --p: 100%; }
+  .pl__seek::-webkit-slider-runnable-track, .pl__vol::-webkit-slider-runnable-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--led-ink) var(--p), rgba(255,255,255,.22) var(--p)); }
+  .pl__seek::-moz-range-track, .pl__vol::-moz-range-track { height: 4px; border-radius: 4px; background: linear-gradient(to right, var(--led-ink) var(--p), rgba(255,255,255,.22) var(--p)); }
+  .pl__seek::-webkit-slider-thumb, .pl__vol::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(43,48,242,.45); transition: transform .15s; }
+  .pl__seek::-moz-range-thumb, .pl__vol::-moz-range-thumb { width: 14px; height: 14px; border: 0; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px rgba(43,48,242,.45); }
+  .pl__seek:hover::-webkit-slider-thumb { transform: scale(1.2); }
+  .pl__seek:focus-visible, .pl__vol:focus-visible { outline: 2px solid var(--led-ink); outline-offset: 2px; border-radius: 4px; }
+
+  /* Pantalla completa del escenario */
+  .pl__stage:fullscreen { aspect-ratio: auto; width: 100vw; height: 100vh; }
+  .pl__stage:fullscreen .pl__frame { top: calc(50% - 150vw * 9 / 16); height: calc(300vw * 9 / 16); }
+
+  .pl__audio { height: 352px; padding: 0 1rem 1rem; }
+  .pl__audio :global(iframe) { width: 100%; height: 100%; border: 0; border-radius: 12px; display: block; }
+
+  @media (max-width: 600px) {
+    .pl__vol, .pl__time--dur { display: none; }
+    .pl__big { width: 64px; height: 64px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .pl__spin { animation-duration: 2s; } }
 </style>
 
 <script>
-  const dlg = document.querySelector<HTMLDialogElement>('[data-player]')!;
-  const frame = dlg.querySelector<HTMLElement>('[data-player-frame]')!;
-  const title = dlg.querySelector<HTMLElement>('#pl-title')!;
-  let opener: HTMLElement | null = null;
+  type YTPlayer = {
+    loadVideoById(id: string): void; cueVideoById(id: string): void; playVideo(): void; pauseVideo(): void; stopVideo(): void;
+    seekTo(s: number, allow: boolean): void; getCurrentTime(): number; getDuration(): number; getPlayerState(): number;
+    mute(): void; unMute(): void; isMuted(): boolean; setVolume(v: number): void; getVolume(): number;
+  };
+  declare global { interface Window { YT: any; onYouTubeIframeAPIReady?: () => void } }
 
-  function open(src: string, label: string, audio: boolean, from: HTMLElement) {
-    opener = from;
-    const f = document.createElement('iframe');
-    f.src = src; f.title = label;
-    f.allow = 'autoplay; encrypted-media; picture-in-picture; clipboard-write';
-    f.allowFullscreen = true;
-    frame.classList.toggle('is-audio', audio);
-    frame.replaceChildren(f);
-    title.textContent = label;
-    dlg.showModal();
+  const dlg = document.querySelector<HTMLDialogElement>('[data-player]')!;
+  const $ = <T extends Element = HTMLElement>(s: string) => dlg.querySelector<T>(s)!;
+  const stage = $('[data-stage]'), audio = $('[data-audio]');
+  const poster = $<HTMLImageElement>('[data-poster]');
+  const seek = $<HTMLInputElement>('[data-seek]'), vol = $<HTMLInputElement>('[data-vol]');
+  const cur = $('[data-cur]'), dur = $('[data-dur]'), err = $('[data-error]');
+  const toggles = dlg.querySelectorAll<HTMLButtonElement>('[data-toggle]');
+  let opener: HTMLElement | null = null;
+  let player: YTPlayer | null = null;
+  let ready: Promise<YTPlayer> | null = null;
+  let videoId = '';
+  let tick = 0, idleTimer = 0, seeking = false, watchdog = 0;
+
+  const fmt = (s: number) => { s = Math.max(0, Math.floor(s || 0)); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  const state = (cls: string, on: boolean) => dlg.classList.toggle(cls, on);
+  const setRange = (el: HTMLInputElement, pct: number) => el.style.setProperty('--p', `${pct}%`);
+
+  function loadApi(): Promise<YTPlayer> {
+    if (ready) return ready;
+    ready = new Promise((resolve) => {
+      const create = () => {
+        const p: YTPlayer = new window.YT.Player(dlg.querySelector('[data-yt]'), {
+          host: 'https://www.youtube-nocookie.com',
+          width: '100%', height: '100%',
+          playerVars: { controls: 0, disablekb: 1, fs: 0, rel: 0, iv_load_policy: 3, playsinline: 1, modestbranding: 1, cc_load_policy: 0, origin: location.origin },
+          events: {
+            onReady: () => { player = p; dlg.dataset.ready = '1'; resolve(p); },
+            onStateChange: (e: { data: number }) => onState(e.data),
+            onError: () => { state('is-loading', false); err.hidden = false; },
+          },
+        });
+      };
+      if (window.YT?.Player) return create();
+      window.onYouTubeIframeAPIReady = create;
+      const s = document.createElement('script');
+      s.src = 'https://www.youtube.com/iframe_api';
+      document.head.append(s);
+    });
+    return ready;
   }
+
+  function onState(s: number) {
+    // -1 sin empezar, 0 terminó, 1 reproduciendo, 2 pausa, 3 cargando, 5 en cola
+    state('is-playing', s === 1);
+    state('is-loading', s === 3 || (s === -1 && dlg.classList.contains('is-loading')));
+    state('is-ended', s === 0);
+    if (s === 1) { err.hidden = true; clearTimeout(watchdog); startTick(); poke(); } else stopTick();
+    const label = s === 1 ? 'Pausar' : 'Reproducir';
+    dlg.querySelector('[data-toggle-label]')!.textContent = label;
+    if (s === 0) { setRange(seek, 100); seek.value = '1000'; }
+  }
+
+  function startTick() {
+    stopTick();
+    tick = window.setInterval(() => {
+      if (!player || seeking) return;
+      const d = player.getDuration(), t = player.getCurrentTime();
+      if (d) { seek.value = String(Math.round((t / d) * 1000)); setRange(seek, (t / d) * 100); dur.textContent = fmt(d); }
+      cur.textContent = fmt(t);
+      seek.setAttribute('aria-valuetext', `${fmt(t)} de ${fmt(d)}`);
+    }, 250);
+  }
+  function stopTick() { clearInterval(tick); }
+
+  // Los controles se esconden solos mientras suena y vuelven al mover el mouse o tocar.
+  function poke() {
+    state('is-idle', false);
+    clearTimeout(idleTimer);
+    idleTimer = window.setTimeout(() => state('is-idle', true), 2600);
+  }
+
+  function togglePlay() {
+    if (!player) return;
+    const s = player.getPlayerState();
+    if (s === 1) player.pauseVideo();
+    else { if (s === 0) player.seekTo(0, true); player.playVideo(); }
+  }
+
+  async function openVideo(id: string, title: string, artist: string, thumb: string) {
+    stage.hidden = false; audio.hidden = true; audio.replaceChildren();
+    err.hidden = true;
+    (dlg.querySelector('[data-ext]') as HTMLAnchorElement).href = `https://www.youtube.com/watch?v=${id}`;
+    poster.src = thumb || '';
+    cur.textContent = '0:00'; dur.textContent = '0:00'; seek.value = '0'; setRange(seek, 0);
+    state('is-playing', false); state('is-ended', false); state('is-loading', true);
+    videoId = id;
+    // Si en 12 s no arrancó (red lenta, bloqueo del navegador), ofrecemos abrirlo afuera en vez de dejarlo colgado.
+    clearTimeout(watchdog);
+    watchdog = window.setTimeout(() => { if (videoId === id && !dlg.classList.contains('is-playing')) { state('is-loading', false); err.hidden = false; } }, 12000);
+    const p = await loadApi();
+    if (videoId !== id || !dlg.open) return;
+    p.loadVideoById(id);
+    p.setVolume(Number(vol.value));
+  }
+
+  function openAudio(id: string) {
+    stage.hidden = true; audio.hidden = false;
+    const f = document.createElement('iframe');
+    f.src = `https://open.spotify.com/embed/track/${id}?utm_source=generator&theme=0`;
+    f.title = 'Reproductor de Spotify';
+    f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+    audio.replaceChildren(f);
+  }
+
   document.addEventListener('click', (e) => {
     const el = (e.target as HTMLElement).closest<HTMLElement>('[data-play],[data-spotify]');
-    if (!el) return;
+    if (!el || dlg.contains(el)) return;
     e.preventDefault();
-    const label = el.dataset.title ?? '';
-    if (el.dataset.play) open(`https://www.youtube-nocookie.com/embed/${el.dataset.play}?autoplay=1&rel=0`, label, false, el);
-    else open(`https://open.spotify.com/embed/track/${el.dataset.spotify}?utm_source=generator&theme=0`, label, true, el);
+    opener = el;
+    $('#pl-title').textContent = el.dataset.title ?? '';
+    $('.pl__artist').textContent = el.dataset.artist ?? '';
+    dlg.showModal();
+    if (el.dataset.play) openVideo(el.dataset.play, el.dataset.title ?? '', el.dataset.artist ?? '', el.dataset.thumb ?? '');
+    else if (el.dataset.spotify) openAudio(el.dataset.spotify);
   });
-  dlg.querySelector('[data-player-close]')!.addEventListener('click', () => dlg.close());
+
+  toggles.forEach((b) => b.addEventListener('click', togglePlay));
+  $('[data-close]').addEventListener('click', () => dlg.close());
   dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
-  dlg.addEventListener('close', () => { frame.replaceChildren(); opener?.focus(); });
+  dlg.addEventListener('close', () => {
+    player?.stopVideo(); stopTick(); clearTimeout(watchdog); videoId = '';
+    audio.replaceChildren();
+    if (document.fullscreenElement) document.exitFullscreen();
+    state('is-playing', false); state('is-idle', false);
+    opener?.focus();
+  });
+
+  seek.addEventListener('input', () => {
+    seeking = true;
+    setRange(seek, Number(seek.value) / 10);
+    if (player) cur.textContent = fmt((Number(seek.value) / 1000) * player.getDuration());
+  });
+  seek.addEventListener('change', () => {
+    if (player) player.seekTo((Number(seek.value) / 1000) * player.getDuration(), true);
+    seeking = false;
+  });
+  vol.addEventListener('input', () => {
+    const v = Number(vol.value); setRange(vol, v);
+    if (!player) return;
+    player.setVolume(v);
+    if (v === 0) player.mute(); else if (player.isMuted()) player.unMute();
+    state('is-muted', v === 0);
+  });
+  $('[data-mute]').addEventListener('click', () => {
+    if (!player) return;
+    const muted = !player.isMuted();
+    muted ? player.mute() : player.unMute();
+    if (!muted && Number(vol.value) === 0) { vol.value = '60'; setRange(vol, 60); player.setVolume(60); }
+    state('is-muted', muted);
+    dlg.querySelector('[data-mute-label]')!.textContent = muted ? 'Activar sonido' : 'Silenciar';
+  });
+  $('[data-fs]').addEventListener('click', () => {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else stage.requestFullscreen?.().catch(() => {});
+  });
+
+  stage.addEventListener('pointermove', poke);
+  stage.addEventListener('pointerdown', poke);
+
+  dlg.addEventListener('keydown', (e) => {
+    if (stage.hidden || !player) return;
+    const t = e.target as HTMLElement;
+    if (t.matches('input[type=range]') && ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key)) return;
+    const k = e.key.toLowerCase();
+    if (k === ' ' || k === 'k') { if (t.tagName === 'BUTTON' && k === ' ') return; e.preventDefault(); togglePlay(); }
+    else if (k === 'arrowright') { e.preventDefault(); player.seekTo(player.getCurrentTime() + 5, true); }
+    else if (k === 'arrowleft') { e.preventDefault(); player.seekTo(Math.max(0, player.getCurrentTime() - 5), true); }
+    else if (k === 'm') $('[data-mute]').click();
+    else if (k === 'f') $('[data-fs]').click();
+    poke();
+  });
 </script>

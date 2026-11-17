@@ -3,8 +3,8 @@ const path = Astro.url.pathname;
 const links = [
   { href: '/produccion', label: 'Producción' },
   { href: '/kits', label: 'Drum kits' },
-  { href: '/#lanzamientos', label: 'Lanzamientos' },
-  { href: '/#blito', label: 'Blito' },
+  { href: '/lanzamientos', label: 'Lanzamientos' },
+  { href: '/blito', label: 'Blito' },
 ];
 const actual = (href: string) => !href.includes('#') && (path === href || path.startsWith(href + '/'));
 ---

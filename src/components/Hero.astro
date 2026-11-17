@@ -1,8 +1,9 @@
 ---
-import { Image } from 'astro:assets';
+import { Image, getImage } from 'astro:assets';
 import { lanzamientos } from '../data/site';
 import { img } from '../lib/img';
 const ultimo = lanzamientos[0];
+const ultimoPoster = (await getImage({ src: img(ultimo.img), width: 1280, format: 'webp' })).src;
 ---
 <section class="hero" aria-labelledby="hero-t">
   <div class="hero__glow" aria-hidden="true"></div>
@@ -33,7 +34,7 @@ const ultimo = lanzamientos[0];
         <a href="/kits" class="btn btn--ghost">Ver drum kits</a>
       </div>
     </div>
-    <a class="now" href="#lanzamientos" data-play={ultimo.youtube} data-title={`${ultimo.tema}, ${ultimo.artistas}`}>
+    <a class="now" href="/lanzamientos" data-play={ultimo.youtube} data-title={ultimo.tema} data-artist={ultimo.artistas} data-thumb={ultimoPoster}>
       <span class="now__dot" aria-hidden="true"></span>
       <span><span class="now__k">Escuchá lo último</span><strong>{ultimo.tema}</strong>{ultimo.artistas}</span>
     </a>

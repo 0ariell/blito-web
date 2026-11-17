@@ -3,6 +3,8 @@ import KitCover from './KitCover.astro';
 import KitCard from './KitCard.astro';
 import { kits, totalSonidos, ars } from '../data/site';
 const [destacado, ...resto] = kits;
+interface Props { compacto?: boolean }
+const { compacto = false } = Astro.props;
 ---
 <section id="kits" class="sec kits" aria-labelledby="kits-t">
   <div class="wrap">
@@ -11,7 +13,7 @@ const [destacado, ...resto] = kits;
         <h2 id="kits-t" class="sec-title">Drum kits</h2>
         <p class="sec-lead">Los sonidos con los que se hacen los temas del estudio. Pagás con Mercado Pago y te llegan al mail.</p>
       </div>
-      <a href="/kits" class="btn btn--ghost">Ver todos los kits</a>
+      <a href="/kits" class="btn btn--ghost">Ver los {kits.length} kits</a>
     </div>
 
     <article class="feat">
@@ -22,11 +24,13 @@ const [destacado, ...resto] = kits;
         <p class="feat__tag">Nuevo</p>
         <h3 class="feat__name"><a href={`/kits/${destacado.slug}`}>{destacado.nombre} Vol. {Number(destacado.vol)}</a></h3>
         <p class="feat__lead">{destacado.bajada}</p>
+        {!compacto && (
         <ul class="feat__list" role="list">
-          {destacado.contenido.map((c) => (
-            <li><span>{c.item}</span><span>{c.cantidad}</span></li>
-          ))}
-        </ul>
+            {destacado.contenido.map((c) => (
+              <li><span>{c.item}</span><span>{c.cantidad}</span></li>
+            ))}
+          </ul>
+        )}
         <div class="feat__buy">
           <p class="price"><strong>{ars(destacado.precioArs)}</strong> <span>pago único</span></p>
           <a href={`/kits/${destacado.slug}`} class="btn">Ver el kit</a>
@@ -35,9 +39,9 @@ const [destacado, ...resto] = kits;
       </div>
     </article>
 
-    <ul class="more" role="list">
+    {!compacto && <ul class="more" role="list">
       {resto.map((k) => <li><KitCard kit={k} /></li>)}
-    </ul>
+    </ul>}
   </div>
 </section>
 
