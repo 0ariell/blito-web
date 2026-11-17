@@ -105,3 +105,12 @@ test('un link de descarga adulterado no sirve', async ({ request }) => {
   const res = await request.get('/api/descarga?p=00000000-0000-0000-0000-000000000000&e=9999999999&s=falso');
   expect(res.status()).toBe(403);
 });
+
+test('galería detrás de escena: se desplaza con los botones', async ({ page, isMobile }) => {
+  test.skip(isMobile, 'en mobile se desliza con el dedo');
+  await page.goto('/#backstage');
+  const track = page.locator('#gal-track');
+  await expect(page.getByRole('button', { name: 'Fotos anteriores' })).toBeDisabled();
+  await page.getByRole('button', { name: 'Fotos siguientes' }).click();
+  await expect.poll(() => track.evaluate((el) => el.scrollLeft)).toBeGreaterThan(100);
+});

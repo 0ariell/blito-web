@@ -8,6 +8,7 @@ import Studio from '../components/Studio.astro';
 import Demo from '../components/Demo.astro';
 import Player from '../components/Player.astro';
 import About from '../components/About.astro';
+import Gallery from '../components/Gallery.astro';
 import { getImage } from 'astro:assets';
 import { hero } from '../data/site';
 import { img } from '../lib/img';
@@ -28,6 +29,7 @@ const heroImg = hero.activo ? null : await getImage({ src: img('blito-night.jpg'
   <About />
   <KitsSection />
   <Artists />
+  <Gallery />
   <Studio />
   <Demo />
   <Player />
