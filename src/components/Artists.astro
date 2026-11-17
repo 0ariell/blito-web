@@ -1,0 +1,67 @@
+---
+import { Image } from 'astro:assets';
+import { artistas } from '../data/site';
+import { img } from '../lib/img';
+---
+<section id="artistas" class="sec art" aria-labelledby="art-t">
+  <div class="wrap art__grid">
+    <div>
+      <h2 id="art-t" class="sec-title">Con quién trabajamos</h2>
+      <p class="sec-lead">Artistas que grabaron en el estudio, salieron por el sello o compartieron tema con Blito.</p>
+      <ul class="names" role="list">
+        {artistas.map((a, i) => (
+          <li>
+            <a href={a.url} data-i={i} class:list={[{ 'is-on': i === 0 }]} target="_blank" rel="noopener">
+              <Image src={img(a.img)} alt="" widths={[96]} sizes="48px" class="names__thumb" loading="lazy" />
+              <span>{a.nombre}</span>
+            </a>
+          </li>
+        ))}
+        <li class="names__you"><a href="#demo"><span>¿Vos?</span></a></li>
+      </ul>
+    </div>
+    <div class="art__stage" aria-hidden="true">
+      {artistas.map((a, i) => (
+        <Image src={img(a.img)} alt="" widths={[480, 800]} sizes="40vw" data-i={i} class:list={['art__img', { 'is-on': i === 0 }]} loading="lazy" />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .art__grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(2rem, 5vw, 5rem); align-items: start; }
+  .names { list-style: none; margin: clamp(2rem, 4vw, 3rem) 0 0; padding: 0; }
+  .names a {
+    display: flex; align-items: center; gap: 1rem; text-decoration: none; padding-block: .1rem;
+    font-size: clamp(2.6rem, 1.2rem + 5.2vw, 6.5rem); line-height: .98; font-weight: 900;
+    font-variation-settings: 'wdth' 62; letter-spacing: -0.015em; text-transform: uppercase;
+    color: #5a5e8c; transition: color .2s;
+  }
+  .names a:hover, .names a:focus-visible, .names a.is-on { color: #fff; }
+  .names__thumb { display: none; width: 48px; height: 48px; object-fit: cover; border-radius: 50%; }
+  .names__you a { color: transparent; -webkit-text-stroke: 2px var(--led-ink); }
+  .names__you a:hover, .names__you a:focus-visible { color: var(--led); -webkit-text-stroke-color: var(--led); }
+  .art__stage { position: sticky; top: 100px; aspect-ratio: 4 / 5; border-radius: 16px; overflow: hidden; background: #0a0a14; box-shadow: 0 0 0 1px var(--line), 0 40px 120px -40px rgba(43,48,242,.6); }
+  .art__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .35s; }
+  .art__img.is-on { opacity: 1; }
+  @media (max-width: 860px) {
+    .art__grid { grid-template-columns: 1fr; }
+    .art__stage { display: none; }
+    .names a { color: #fff; font-size: clamp(2.2rem, 10vw, 3.4rem); }
+    .names__thumb { display: block; }
+    .names li + li { margin-top: .5rem; }
+  }
+</style>
+
+<script>
+  const imgs = document.querySelectorAll<HTMLElement>('.art__img');
+  const links = document.querySelectorAll<HTMLAnchorElement>('.names a[data-i]');
+  links.forEach((a) => {
+    const on = () => {
+      links.forEach((x) => x.classList.toggle('is-on', x === a));
+      imgs.forEach((im) => im.classList.toggle('is-on', im.dataset.i === a.dataset.i));
+    };
+    a.addEventListener('pointerenter', on);
+    a.addEventListener('focus', on);
+  });
+</script>

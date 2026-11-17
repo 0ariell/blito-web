@@ -1,0 +1,161 @@
+---
+import { Image } from 'astro:assets';
+import { hero, lanzamientos } from '../data/site';
+import { img } from '../lib/img';
+const ultimo = lanzamientos[0];
+---
+<section class="hero" class:list={[{ 'hero--video': hero.activo }]} aria-labelledby="hero-t">
+  <div class="hero__media">
+    {hero.activo ? (
+      <video
+        class="hero__video"
+        data-hero-video
+        muted
+        loop
+        playsinline
+        preload="metadata"
+        poster={hero.poster}
+        aria-label="Video de Blito en el estudio"
+      >
+        <source src={hero.webm_1080} type="video/webm" media="(min-width: 900px)" />
+        <source src={hero.mp4_1080} type="video/mp4" media="(min-width: 900px)" />
+        <source src={hero.mp4_720} type="video/mp4" />
+      </video>
+    ) : (
+      <Image
+        src={img('blito-night.jpg')}
+        alt="Blito de noche, con gorro gris y buzo negro, frente a un auto."
+        class="hero__still"
+        widths={[480, 785]}
+        sizes="(min-width: 900px) 46vw, 100vw"
+        loading="eager"
+        fetchpriority="high"
+      />
+    )}
+  </div>
+
+  <div class="wrap hero__content">
+    <h1 id="hero-t" class="hero__mark" aria-label="Blito Producciones">
+      <span aria-hidden="true">
+        {'BLITO'.split('').map((l, i) => <span style={`--i:${i}`}>{l}</span>)}
+      </span>
+    </h1>
+    <div class="hero__row">
+      <div>
+        <p class="hero__lead">Productora, sello y drum kits. Hacemos el beat, grabamos, mezclamos y sacamos el tema.</p>
+        <div class="hero__actions">
+          <a href="/kits" class="btn btn--white">Ver drum kits</a>
+          <a href="#demo" class="btn btn--ghost">Mandá tu demo</a>
+        </div>
+      </div>
+      <div class="hero__side">
+        <a class="now" href="#lanzamientos" data-play={ultimo.youtube} data-title={`${ultimo.tema}, ${ultimo.artistas}`}>
+          <span class="now__dot" aria-hidden="true"></span>
+          <span><span class="now__k">Lo último</span><strong>{ultimo.tema}</strong>{ultimo.artistas}</span>
+        </a>
+        {hero.activo && (
+          <button class="hero__pause" data-hero-toggle aria-pressed="false">
+            <span class="visually-hidden" data-label>Pausar video</span>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path class="i-pause" d="M7 5h3v14H7zM14 5h3v14h-3z" fill="currentColor"/><path class="i-play" d="M8 5v14l11-7z" fill="currentColor"/></svg>
+          </button>
+        )}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero { position: relative; min-height: 100svh; display: grid; align-items: end; overflow: hidden; isolation: isolate; }
+  .hero__media { position: absolute; inset: 0; z-index: -1; }
+  .hero__video { width: 100%; height: 100%; object-fit: cover; }
+  .hero--video .hero__media::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(to top, #000 0%, rgba(0,0,0,.55) 38%, rgba(0,0,0,.1) 70%, rgba(0,0,0,.45) 100%);
+  }
+  /* Sin video: la foto ocupa la columna derecha y se funde en el negro. */
+  .hero:not(.hero--video) .hero__media { left: auto; width: min(46vw, 760px); }
+  .hero__still { width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+  .hero:not(.hero--video) .hero__media::after {
+    content: ''; position: absolute; inset: 0;
+    background:
+      linear-gradient(to right, #000 0%, rgba(0,0,0,0) 45%),
+      linear-gradient(to top, #000 0%, rgba(0,0,0,0) 45%);
+  }
+  .hero:not(.hero--video) .hero__media::before {
+    /* el resplandor azul de las tiras LED del estudio */
+    content: ''; position: absolute; inset: auto -30% -20% -60%; height: 70%; z-index: 1;
+    background: radial-gradient(closest-side, rgba(43,48,242,.45), transparent); mix-blend-mode: screen; pointer-events: none;
+  }
+
+  .hero__content { padding-top: 110px; padding-bottom: clamp(2rem, 5vw, 3.5rem); }
+  .hero__mark {
+    margin: 0 -0.04em; font-size: clamp(4.5rem, 24.2vw, 22rem); line-height: .78; font-weight: 900;
+    font-variation-settings: 'wdth' 125; letter-spacing: -0.045em;
+  }
+  .hero__mark > span { display: flex; justify-content: space-between; padding-top: .06em; clip-path: inset(-1em -1em 0 -1em); }
+  .hero__mark > span > span { display: block; animation: rise 1s var(--ease) both; animation-delay: calc(200ms + var(--i) * 70ms); }
+  @keyframes rise { from { transform: translateY(105%); } }
+
+  .hero__row { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: end; gap: 2rem; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
+  .hero__lead { margin: 0; max-width: 30ch; font-size: var(--step-1); line-height: 1.25; font-weight: 600; font-variation-settings: 'wdth' 92; }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: .8rem; margin-top: 1.5rem; }
+  .hero__side { display: flex; align-items: end; gap: 1rem; }
+
+  .now {
+    display: flex; gap: .9rem; align-items: flex-start; max-width: 34ch; padding: 1rem 1.2rem;
+    border-radius: 14px; background: rgba(0,0,0,.45); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    box-shadow: inset 0 0 0 1px var(--line); text-decoration: none; font-size: var(--step--1); line-height: 1.4; color: var(--mute);
+    transition: box-shadow .2s;
+  }
+  .now:hover { box-shadow: inset 0 0 0 1px var(--led-ink); }
+  .now strong { display: block; color: #fff; font-size: var(--step-0); }
+  .now__k { display: block; color: var(--led-ink); font-weight: 600; }
+  .now__dot { flex: none; width: .65rem; height: .65rem; margin-top: .3rem; border-radius: 50%; background: var(--rec); box-shadow: 0 0 0 4px rgba(255,59,47,.22); }
+
+  .hero__pause {
+    flex: none; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; border: 0; cursor: pointer;
+    background: rgba(0,0,0,.45); box-shadow: inset 0 0 0 1px var(--line); backdrop-filter: blur(10px);
+  }
+  .hero__pause .i-play { display: none; }
+  .hero__pause[aria-pressed='true'] .i-play { display: block; }
+  .hero__pause[aria-pressed='true'] .i-pause { display: none; }
+
+  @media (max-width: 760px) {
+    .hero:not(.hero--video) { align-items: end; }
+    .hero:not(.hero--video) .hero__media { width: 100%; height: 72%; }
+    .hero:not(.hero--video) .hero__media::after { background: linear-gradient(to top, #000 8%, rgba(0,0,0,0) 60%); }
+    .hero__side { width: 100%; }
+    .now { flex: 1; }
+  }
+</style>
+
+<script>
+  const v = document.querySelector<HTMLVideoElement>('[data-hero-video]');
+  const btn = document.querySelector<HTMLButtonElement>('[data-hero-toggle]');
+  if (v) {
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    let userPaused = reduce.matches; // con movimiento reducido arranca quieto y se ve el poster
+    const sync = () => {
+      btn?.setAttribute('aria-pressed', String(v.paused));
+      const l = btn?.querySelector('[data-label]');
+      if (l) l.textContent = v.paused ? 'Reproducir video' : 'Pausar video';
+    };
+    const play = () => v.play().catch(() => {}).finally(sync);
+    if (!userPaused) play();
+    btn?.addEventListener('click', () => {
+      userPaused = !v.paused;
+      userPaused ? v.pause() : play();
+      sync();
+    });
+    // Pausar fuera de pantalla o con la pestaña oculta: ahorra batería y datos.
+    new IntersectionObserver(([e]) => {
+      if (userPaused) return;
+      e.isIntersecting ? play() : v.pause();
+    }, { threshold: 0.15 }).observe(v);
+    document.addEventListener('visibilitychange', () => {
+      if (userPaused) return;
+      document.hidden ? v.pause() : play();
+    });
+    v.addEventListener('pause', sync); v.addEventListener('play', sync);
+  }
+</script>

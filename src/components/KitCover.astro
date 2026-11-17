@@ -1,0 +1,39 @@
+---
+// Portada de kit armada en CSS: la caja negra con la tira LED del estudio.
+// Cuando haya renders 3D de cada kit, se reemplaza por <Image>.
+import type { Kit } from '../data/site';
+interface Props { kit: Kit; size?: 'lg' | 'md' }
+const { kit, size = 'md' } = Astro.props;
+const variante = ['bottom', 'side', 'top'][(Number(kit.vol) - 1) % 3];
+---
+<div class:list={['kc', `kc--${variante}`, `kc--${size}`]} aria-hidden="true">
+  <span class="kc__strip"></span>
+  <span class="kc__vol">{kit.vol}</span>
+  <span class="kc__name">{kit.nombre}</span>
+  <span class="kc__by">BLITO <small>Drum kit</small></span>
+</div>
+
+<style>
+  .kc {
+    position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 14px; container-type: inline-size;
+    background: #000; box-shadow: inset 0 0 0 1px var(--line);
+    display: grid; padding: 7%; align-content: space-between; text-decoration: none; color: #fff;
+  }
+  .kc__strip { position: absolute; background: var(--led); box-shadow: 0 0 6cqi 2cqi rgba(43,48,242,.9), 0 0 30cqi 10cqi rgba(43,48,242,.45); }
+  .kc--bottom .kc__strip { left: 8%; right: 8%; bottom: 14%; height: 1.4cqi; border-radius: 99px; }
+  .kc--side .kc__strip { top: 10%; bottom: 10%; right: 12%; width: 1.4cqi; border-radius: 99px; }
+  .kc--top .kc__strip { left: 8%; right: 8%; top: 12%; height: 1.4cqi; border-radius: 99px; }
+  .kc__vol {
+    position: relative; font-size: 46cqi; line-height: .8; font-weight: 900; font-variation-settings: 'wdth' 125;
+    letter-spacing: -0.06em; color: transparent; -webkit-text-stroke: .5cqi rgba(255,255,255,.85);
+  }
+  .kc--top .kc__vol { order: 2; align-self: end; }
+  .kc__name {
+    position: relative; font-size: 13cqi; line-height: .9; font-weight: 900; font-variation-settings: 'wdth' 125;
+    letter-spacing: -0.03em; text-transform: uppercase; color: #fff;
+  }
+  .kc__by { position: absolute; left: 7cqi; top: 7cqi; font-size: 3.6cqi; font-weight: 800; letter-spacing: .02em; color: #fff; }
+  .kc--top .kc__by { top: auto; bottom: 7cqi; }
+  .kc__by small { font-weight: 500; color: var(--mute); margin-left: .5em; font-size: 1em; }
+  .kc--bottom .kc__vol, .kc--side .kc__vol { margin-top: 10cqi; }
+</style>

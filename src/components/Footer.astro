@@ -1,0 +1,84 @@
+---
+import { contacto } from '../data/site';
+---
+<footer class="ft">
+  <div class="wrap">
+    <div class="ft__grid">
+      <form class="ft__news" method="post" action="/api/suscribir" data-subscribe>
+        <h2>Enterate cuando sale un kit</h2>
+        <p>Un mail por lanzamiento. Nada más.</p>
+        <div class="ft__row">
+          <label class="visually-hidden" for="news-email">Tu mail</label>
+          <input id="news-email" name="email" type="email" autocomplete="email" required placeholder="tu@mail.com" />
+          <input type="hidden" name="origen" value="footer" />
+          <button class="btn" type="submit">Suscribirme</button>
+        </div>
+        <p class="ft__status" role="status" aria-live="polite"></p>
+      </form>
+      <nav class="ft__links" aria-label="Redes y contacto">
+        <a href={contacto.igSello}>Instagram del sello</a>
+        <a href={contacto.igBlito}>Instagram de Blito</a>
+        <a href={contacto.youtube}>YouTube</a>
+        <a href={contacto.whatsappUrl}>WhatsApp</a>
+      </nav>
+    </div>
+    <p class="ft__mark" aria-hidden="true">BLITO</p>
+    <div class="ft__base">
+      <p>© 2026 Blito Producciones. Buenos Aires, Argentina.</p>
+      <p><a href="/kits">Drum kits</a> <a href="/#demo">Mandá tu demo</a></p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .ft { border-top: 1px solid var(--line); padding-top: clamp(3rem, 7vw, 6rem); overflow: hidden; }
+  .ft__grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 3rem; }
+  .ft__news h2 { margin: 0; font-size: var(--step-2); line-height: 1; font-weight: 900; font-variation-settings: 'wdth' 118; letter-spacing: -0.02em; }
+  .ft__news > p { margin: .6rem 0 1.4rem; color: var(--mute); }
+  .ft__row { display: flex; gap: .6rem; max-width: 520px; }
+  .ft__row input {
+    flex: 1; min-width: 0; min-height: 48px; padding: 0 1.1rem; border-radius: 999px;
+    background: var(--panel); border: 1px solid var(--line); color: #fff; font: inherit;
+  }
+  .ft__row input::placeholder { color: #8c90ad; }
+  .ft__row input:focus { outline: none; border-color: var(--led-ink); }
+  .ft__status { margin: .8rem 0 0; font-weight: 600; color: var(--led-ink); }
+  .ft__status:empty { display: none; }
+  .ft__links { display: grid; gap: .3rem; justify-items: start; align-content: start; }
+  .ft__links a { text-decoration: none; font-weight: 600; padding-block: .45rem; }
+  .ft__links a:hover { color: var(--led-ink); }
+  .ft__mark {
+    margin: clamp(3rem, 7vw, 6rem) -0.04em 0; font-size: clamp(4.5rem, 24.2vw, 22rem); line-height: .78;
+    font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.045em;
+    color: transparent; -webkit-text-stroke: 1px var(--line);
+  }
+  .ft__base { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; padding-block: 1.5rem 2rem; font-size: var(--step--1); color: var(--mute); }
+  .ft__base p { margin: 0; }
+  .ft__base a { margin-left: 1.2rem; }
+  @media (max-width: 760px) {
+    .ft__grid { grid-template-columns: 1fr; }
+    .ft__row { flex-direction: column; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLFormElement>('[data-subscribe]').forEach((form) => {
+    const status = form.querySelector<HTMLElement>('[role=status]')!;
+    const btn = form.querySelector<HTMLButtonElement>('button[type=submit]')!;
+    const label = btn.textContent;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      btn.disabled = true; btn.textContent = 'Anotando…'; status.textContent = '';
+      try {
+        const res = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+        const data = await res.json();
+        status.textContent = data.ok ? (form.dataset.okMsg ?? 'Listo, te avisamos por mail.') : data.error;
+        if (data.ok) form.reset();
+      } catch {
+        status.textContent = 'No se pudo anotar. Revisá tu conexión y probá de nuevo.';
+      } finally {
+        btn.disabled = false; btn.textContent = label;
+      }
+    });
+  });
+</script>

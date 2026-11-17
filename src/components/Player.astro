@@ -1,0 +1,61 @@
+---
+// Un solo reproductor para toda la página: cualquier elemento con data-play (YouTube)
+// o data-spotify lo abre. Así no se cargan iframes hasta que alguien toca play.
+---
+<dialog class="pl" data-player aria-labelledby="pl-title">
+  <div class="pl__bar">
+    <p id="pl-title" class="pl__title"></p>
+    <button class="pl__close" data-player-close>
+      <span class="visually-hidden">Cerrar reproductor</span>
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <div class="pl__frame" data-player-frame></div>
+</dialog>
+
+<style>
+  .pl {
+    width: min(1100px, calc(100vw - 2 * var(--gutter))); max-height: 92vh; padding: 0; border: 0; border-radius: 16px;
+    background: #000; color: #fff; box-shadow: 0 0 0 1px var(--line), 0 30px 120px rgba(43,48,242,.35); overflow: hidden;
+  }
+  .pl::backdrop { background: rgba(0,0,0,.8); backdrop-filter: blur(6px); }
+  .pl[open] { animation: pl-in .28s var(--ease); }
+  @keyframes pl-in { from { opacity: 0; transform: translateY(12px) scale(.98); } }
+  .pl__bar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem .5rem .5rem 1.2rem; }
+  .pl__title { margin: 0; font-weight: 700; font-size: var(--step--1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pl__close { display: grid; place-items: center; width: 48px; height: 48px; flex: none; border: 0; border-radius: 50%; background: none; cursor: pointer; }
+  .pl__close:hover { background: var(--panel); }
+  .pl__frame { aspect-ratio: 16 / 9; background: #000; }
+  .pl__frame.is-audio { aspect-ratio: auto; height: 352px; padding: 0 1rem 1rem; }
+  .pl__frame iframe { width: 100%; height: 100%; border: 0; display: block; border-radius: 8px; }
+</style>
+
+<script>
+  const dlg = document.querySelector<HTMLDialogElement>('[data-player]')!;
+  const frame = dlg.querySelector<HTMLElement>('[data-player-frame]')!;
+  const title = dlg.querySelector<HTMLElement>('#pl-title')!;
+  let opener: HTMLElement | null = null;
+
+  function open(src: string, label: string, audio: boolean, from: HTMLElement) {
+    opener = from;
+    const f = document.createElement('iframe');
+    f.src = src; f.title = label;
+    f.allow = 'autoplay; encrypted-media; picture-in-picture; clipboard-write';
+    f.allowFullscreen = true;
+    frame.classList.toggle('is-audio', audio);
+    frame.replaceChildren(f);
+    title.textContent = label;
+    dlg.showModal();
+  }
+  document.addEventListener('click', (e) => {
+    const el = (e.target as HTMLElement).closest<HTMLElement>('[data-play],[data-spotify]');
+    if (!el) return;
+    e.preventDefault();
+    const label = el.dataset.title ?? '';
+    if (el.dataset.play) open(`https://www.youtube-nocookie.com/embed/${el.dataset.play}?autoplay=1&rel=0`, label, false, el);
+    else open(`https://open.spotify.com/embed/track/${el.dataset.spotify}?utm_source=generator&theme=0`, label, true, el);
+  });
+  dlg.querySelector('[data-player-close]')!.addEventListener('click', () => dlg.close());
+  dlg.addEventListener('click', (e) => { if (e.target === dlg) dlg.close(); });
+  dlg.addEventListener('close', () => { frame.replaceChildren(); opener?.focus(); });
+</script>

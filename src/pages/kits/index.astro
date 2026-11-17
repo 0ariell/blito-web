@@ -1,0 +1,43 @@
+---
+import Base from '../../layouts/Base.astro';
+import KitCover from '../../components/KitCover.astro';
+import { kits, totalSonidos, ars } from '../../data/site';
+---
+<Base title="Drum kits de Blito" description="Drum kits, loops y one-shots para RKT, trap, drill y turreo, hechos en el estudio de Blito.">
+  <section class="sec kl">
+    <div class="wrap">
+      <h1 class="kl__title">Drum kits</h1>
+      <p class="sec-lead kl__lead">Los sonidos del estudio, listos para arrastrar al proyecto. WAV, descarga al instante, libres de regalías.</p>
+      <ul class="kl__grid" role="list">
+        {kits.map((k) => (
+          <li>
+            <a href={`/kits/${k.slug}`} class="kl__item">
+              <KitCover kit={k} />
+              <span class="kl__row">
+                <span class="kl__name">{k.nombre} Vol. {Number(k.vol)}</span>
+                <span class="kl__price">{k.estado === 'venta' ? ars(k.precioArs) : 'Próximamente'}</span>
+              </span>
+              <span class="kl__meta">{k.generos.join(', ')}. {totalSonidos(k)} sonidos.</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .kl { padding-top: 140px; }
+  .kl__title { margin: 0; font-size: clamp(3.4rem, 1rem + 9vw, 10rem); line-height: .82; font-weight: 900; font-variation-settings: 'wdth' 125; letter-spacing: -0.045em; }
+  .kl__lead { margin-bottom: clamp(2.5rem, 5vw, 4rem); }
+  .kl__grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 2.5vw, 2rem); }
+  .kl__item { display: grid; gap: .8rem; text-decoration: none; }
+  .kl__item :global(.kc) { transition: transform .45s var(--ease), box-shadow .3s; }
+  .kl__item:hover :global(.kc) { transform: translateY(-6px); box-shadow: inset 0 0 0 1px var(--led-ink), 0 30px 60px -30px rgba(43,48,242,.8); }
+  .kl__row { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+  .kl__name { font-size: var(--step-1); font-weight: 900; font-variation-settings: 'wdth' 112; }
+  .kl__price { color: var(--led-ink); font-weight: 700; white-space: nowrap; }
+  .kl__meta { color: var(--mute); font-size: var(--step--1); margin-top: -.5rem; }
+  @media (max-width: 900px) { .kl__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .kl__grid { grid-template-columns: 1fr; } }
+</style>

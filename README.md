@@ -1,7 +1,10 @@
-# Blito Producciones: maqueta web
+# Blito Producciones
 
-Astro 5 + adaptador Node (Render) + Neon para el formulario de demos. No hace falta Supabase:
-la única cosa dinámica es guardar demos, y eso es una tabla en Neon.
+Sitio de Blito: productora, sello y drum kits. Astro 5 + adaptador Node en Render + Neon (Postgres).
+Diseño dark fijo (negro + azul LED del estudio), sin modo claro.
+
+- Producción: https://blito-producciones.onrender.com
+- Cada push a `main` se publica solo en Render.
 
 ## Correr local
 
@@ -10,19 +13,34 @@ npm install
 npm run dev
 ```
 
-## Deploy
+Con `DATABASE_URL` en `.env` los formularios guardan en Neon; sin eso responden OK y no guardan.
 
-1. Neon: crear proyecto y correr `db/schema.sql` en el SQL Editor.
-2. Render: New → Blueprint con este repo (usa `render.yaml`). Cargar `DATABASE_URL` con el connection string de Neon.
-3. Sin `DATABASE_URL`, el formulario responde OK pero no guarda nada (útil para mostrar la maqueta).
+## Páginas
+
+- `/`: hero con video, lanzamientos (reproductor YouTube/Spotify), drum kits, artistas, estudio, demo.
+- `/kits` y `/kits/<slug>`: tienda de drum kits.
+- `POST /api/demo`: guarda demos en la tabla `demos`.
+- `POST /api/suscribir`: newsletter y lista de espera de kits en `suscriptores` (campo `origen`).
+
+Esquema en `db/schema.sql`.
+
+## Video de portada
+
+```bash
+scripts/encode-hero.sh ruta/al/video.mov [segundo_inicio] [duracion]
+```
+
+Genera en `public/video/` un 1080p WebM (AV1 o VP9), 1080p y 720p MP4 (H.264, faststart) y el poster.
+Después poner `hero.activo = true` en `src/data/site.ts`. El video arranca muteado, tiene botón de pausa,
+se pausa fuera de pantalla y no se reproduce solo con "reducir movimiento".
 
 ## Contenido
 
-Todo el texto editable está en `src/data/site.ts`.
+Todo en `src/data/site.ts`. Imágenes en `src/assets/img/` (Astro las convierte a WebP en varios tamaños).
 
-### Pendiente antes de publicar
-- **Roles y años de los créditos**: están como supuestos (`confirmar: true`). Confirmar con Blito qué hizo en cada tema.
-- **Fotos**: las de `public/img/ig-*.jpg` están recortadas de una captura de Instagram y tienen baja resolución. Reemplazarlas por los originales.
-- **Logo**: `public/img/logo-bp.png` también sale de una captura. Pedir el SVG.
-- **Más créditos y artistas**: agregar en `creditos` y `artistas`; las miniaturas de YouTube van en `public/img/yt-<id>.jpg`.
-- **Dominio**: `site` en `astro.config.mjs` usa `blitoproducciones.com` como provisorio.
+### Pendiente antes de lanzar
+- **Kits (borrador)**: nombres, contenido, cantidades, precios, textos y licencia son provisorios.
+- **Cobro**: cargar `comprarUrl` de cada kit (link de pago de Mercado Pago). Sin link, el botón anota en la lista de espera.
+- **Entrega de archivos** después del pago: falta definir (link en el mail de Mercado Pago, o webhook + descarga firmada).
+- **Créditos**: confirmar con Blito qué hizo en cada tema. Faltan colaboraciones con Eljoan, Facu HDR y DJ Plaga.
+- **Fotos y logo**: las del estudio salen de capturas de Instagram, en baja resolución. Reemplazar por originales.
