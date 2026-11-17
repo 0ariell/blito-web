@@ -20,15 +20,12 @@ export const contacto = {
   taplink: 'https://taplink.cc/blitormx',
 };
 
-/**
- * Video de portada. Generalo con `scripts/encode-hero.sh <video-original>`:
- * deja los archivos en public/video/ y acá solo hay que poner `activo: true`.
- */
+/** Video de portada. Se genera con `scripts/encode-hero.sh` (ver README). */
 export const hero = {
-  activo: false,
-  mp4_1080: '/video/hero-1080.mp4',
-  mp4_720: '/video/hero-720.mp4',
-  webm_1080: '/video/hero-1080.webm',
+  activo: true,
+  webm: '/video/hero.webm',
+  mp4: '/video/hero.mp4',
+  mp4Mobile: '/video/hero-mobile.mp4',
   poster: '/video/hero-poster.jpg',
 };
 

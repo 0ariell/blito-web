@@ -3,16 +3,15 @@ import { Image } from 'astro:assets';
 import { servicios } from '../data/site';
 import { img } from '../lib/img';
 const fotos = [
-  { f: 'ig-6.jpg', alt: 'Blito frente a la consola del estudio, con luces azules.' },
-  { f: 'ig-7.jpg', alt: 'El estudio con paneles acústicos y monitores.' },
-  { f: 'ig-4.jpg', alt: 'Blito en las bandejas, con luz roja.' },
-  { f: 'ig-2.jpg', alt: 'Dos artistas posando en el estudio.' },
+  { f: 'estudio-rojo.jpg', alt: 'El escritorio del estudio con luz roja: notebook con FL Studio, interfaz de audio y monitores.', w: [480, 800, 1200] },
+  { f: 'ig-7.jpg', alt: 'El estudio con paneles acústicos y monitores.', w: [192] },
+  { f: 'ig-6.jpg', alt: 'Blito frente a la consola del estudio, con luces azules.', w: [192] },
 ];
 ---
 <section id="estudio" class="sec st" aria-labelledby="st-t">
   <div class="wrap st__grid">
     <div class="st__photos">
-      {fotos.map((p) => <Image src={img(p.f)} alt={p.alt} widths={[192]} sizes="(min-width: 900px) 20vw, 45vw" loading="lazy" />)}
+      {fotos.map((p, i) => <Image src={img(p.f)} alt={p.alt} widths={p.w} sizes={i === 0 ? '(min-width: 900px) 40vw, 100vw' : '(min-width: 900px) 20vw, 45vw'} loading="lazy" />)}
     </div>
     <div>
       <h2 id="st-t" class="sec-title">El estudio</h2>
@@ -29,7 +28,8 @@ const fotos = [
   .st__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
   .st__photos { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-width: 560px; }
   .st__photos img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 10px; }
-  .st__photos img:nth-child(2n) { transform: translateY(2.5rem); }
+  .st__photos img:first-child { grid-column: 1 / -1; aspect-ratio: 4 / 3; }
+  .st__photos img:nth-child(3) { transform: translateY(1.5rem); }
   .svc { margin: 2rem 0 0; }
   .st__cta { margin-top: 2rem; }
   .svc > div { padding: 1.3rem 0; border-top: 1px solid var(--line); }

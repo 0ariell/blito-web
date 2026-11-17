@@ -1,0 +1,44 @@
+---
+import { Image } from 'astro:assets';
+import { contacto } from '../data/site';
+import { img } from '../lib/img';
+---
+<section id="blito" class="sec ab" aria-labelledby="ab-t">
+  <div class="wrap ab__grid">
+    <figure class="ab__main">
+      <Image src={img('blito-bn-calle.jpg')} alt="Blito de noche en la calle, con buzo Jordan." widths={[480, 800, 1066]} sizes="(min-width: 900px) 42vw, 100vw" loading="lazy" />
+    </figure>
+    <div class="ab__body">
+      <h2 id="ab-t" class="sec-title" translate="no">Blito</h2>
+      <p class="ab__lead">Productor musical y fundador del sello. Hace los beats en el estudio y acompaña cada tema desde la primera idea hasta que sale.</p>
+      <p class="ab__p">Trabaja RKT, trap y turreo, produce para artistas de la escena y saca sus propios remixes y turreo edits.</p>
+      <div class="ab__links">
+        <a class="btn btn--ghost" href={contacto.igBlito} target="_blank" rel="noopener">Instagram de Blito</a>
+        <a class="btn btn--ghost" href={contacto.youtube} target="_blank" rel="noopener">Canal de YouTube</a>
+      </div>
+      <div class="ab__pair">
+        <Image src={img('blito-bn-reja.jpg')} alt="Retrato de Blito apoyado en una reja." widths={[320, 533]} sizes="(min-width: 900px) 18vw, 45vw" loading="lazy" />
+        <Image src={img('blito-bn-retrato.jpg')} alt="Retrato de Blito sobre fondo negro." widths={[320, 533]} sizes="(min-width: 900px) 18vw, 45vw" loading="lazy" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .ab__grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(2rem, 6vw, 6rem); align-items: start; }
+  .ab__main { margin: 0; position: sticky; top: 96px; }
+  .ab__main img, .ab__pair img { width: 100%; height: auto; border-radius: 14px; filter: contrast(1.05); }
+  .ab__main img { aspect-ratio: 2 / 3; object-fit: cover; box-shadow: 0 40px 120px -50px rgba(43,48,242,.7); }
+  .ab__body .sec-title { font-size: clamp(4rem, 2rem + 9vw, 11rem); line-height: .8; letter-spacing: -0.05em; }
+  .ab__lead { margin: 1.6rem 0 0; font-size: var(--step-2); line-height: 1.12; font-weight: 600; font-variation-settings: 'wdth' 90; max-width: 24ch; }
+  .ab__p { margin: 1.2rem 0 0; color: var(--mute); max-width: 46ch; }
+  .ab__links { display: flex; flex-wrap: wrap; gap: .7rem; margin-top: 1.8rem; }
+  .ab__pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: clamp(2.5rem, 5vw, 4rem); max-width: 560px; }
+  .ab__pair img { aspect-ratio: 2 / 3; object-fit: cover; }
+  .ab__pair img:last-child { transform: translateY(2.5rem); }
+  @media (max-width: 860px) {
+    .ab__grid { grid-template-columns: 1fr; }
+    .ab__main { position: static; max-width: 520px; }
+    .ab__pair { display: none; }
+  }
+</style>
